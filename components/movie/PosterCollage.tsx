@@ -38,7 +38,7 @@ export function PosterCollage({ movies }: PosterCollageProps) {
             transition={{ duration: 0.4, ease: motionEase }}
           >
             <Image
-              src={getPosterUrl(movie.posterPath, "w342")}
+              src={getPosterUrl(movie.posterPath)}
               alt=""
               fill
               sizes="200px"
