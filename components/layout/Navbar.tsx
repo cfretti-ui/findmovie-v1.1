@@ -13,7 +13,7 @@ import type { Movie } from "@/types/movie";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Movie[]>([]);
@@ -38,7 +38,7 @@ export function Navbar() {
 
       try {
         const response = await fetch(
-          `/api/search?q=${encodeURIComponent(trimmed)}`,
+          `/api/search?q=${encodeURIComponent(trimmed)}&locale=${locale}`,
           {
             signal: controller.signal,
           },
@@ -66,8 +66,8 @@ export function Navbar() {
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [query]);
-
+  }, [query, locale]);
+  
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {

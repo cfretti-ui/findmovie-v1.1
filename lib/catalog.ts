@@ -85,7 +85,7 @@ export async function searchCatalogMovies(
     );
     return response.results
       .filter((movie) => Boolean(movie.poster_path))
-      .slice(0, 8)
+      .slice(0, 12)
       .map(mapTmdbSummaryToMovie);
   } catch (error) {
     if (error instanceof TmdbApiError) {
