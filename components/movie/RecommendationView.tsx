@@ -81,8 +81,13 @@ export function RecommendationView() {
     router.push("/questionnaire");
   };
 
+  useEffect(() => {
+    if (!isComplete) {
+      router.replace("/questionnaire");
+    }
+  }, [isComplete, router]);
+
   if (!isComplete) {
-    router.replace("/questionnaire");
     return null;
   }
 
@@ -96,17 +101,11 @@ export function RecommendationView() {
           transition={{ duration: 0.45, ease: motionEase }}
         >
           <div className="mb-10 flex items-center justify-between gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/")}
-            >
-              {t("common.back")}
+            <Button variant="ghost" onClick={() => router.push("/")}>
+              {t("recommendation.back")}
             </Button>
 
-            <Button
-              variant="ghost"
-              onClick={handleRestart}
-            >
+            <Button variant="ghost" onClick={handleRestart}>
               {t("recommendation.restart")}
             </Button>
           </div>

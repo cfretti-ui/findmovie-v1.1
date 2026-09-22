@@ -113,7 +113,9 @@ export function Navbar() {
       }}
       className="sticky top-0 z-50 px-3 pt-3 sm:px-5"
     >
-      <div className="glass-surface relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between rounded-[20px] px-3 sm:h-16 sm:px-4">
+      <div className="relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between rounded-[20px] px-3 sm:h-16 sm:px-4">
+  <div className="glass-surface-bg" />
+
         {/* LEFT */}
         <div className="flex min-w-0 items-center gap-2">
           <button

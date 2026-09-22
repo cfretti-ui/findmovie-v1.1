@@ -77,7 +77,26 @@ body {
   pointer-events: none;
   background: linear-gradient(135deg, rgba(255,255,255,.20), transparent 42%, rgba(255,255,255,.05));
 }
+.glass-surface-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--glass-strong) 92%, transparent), color-mix(in srgb, var(--glass) 86%, transparent));
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,.55);
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+  border-radius: var(--radius-2xl);
+}
 
+.glass-surface-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,.20), transparent 42%, rgba(255,255,255,.05));
+}
 .glass-interactive { transition: border-color .28s ease, box-shadow .28s ease, background .28s ease; }
 .glass-interactive:hover { border-color: color-mix(in srgb, var(--foreground) 15%, transparent); box-shadow: 0 18px 55px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.6); }
 
