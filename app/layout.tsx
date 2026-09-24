@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { QuestionnaireProvider } from "@/lib/questionnaire-context";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const inter = Inter({
@@ -27,6 +28,7 @@ export default function RootLayout({
         <LocaleProvider>
           <QuestionnaireProvider>{children}</QuestionnaireProvider>
         </LocaleProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
