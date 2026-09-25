@@ -48,11 +48,9 @@ export function Navbar() {
           throw new Error("Search failed");
         }
 
-        const data = (await response.json()) as {
-          movies?: Movie[];
-        };
+        const data = (await response.json()) as Movie[];
 
-        setResults(data.movies ?? []);
+        setResults(data);
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
           setResults([]);
