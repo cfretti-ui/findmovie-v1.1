@@ -32,13 +32,9 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
     ? `https://www.youtube.com/embed/${movie.trailerKey}?rel=0&modestbranding=1`
     : null;
 
-  return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={fadeUp}
-      transition={{ duration: 0.5, ease: motionEase }}
-    >
+    return (
+
+      <div>
       {/* HERO BACKDROP */}
       <div className="relative h-[320px] w-full overflow-hidden sm:h-[440px]">
         {backdropUrl ? (
@@ -57,7 +53,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/75 to-background/10" />
       </div>
 
-      <div className="mx-auto -mt-28 w-full max-w-6xl px-5 pb-20 sm:px-8">
+      <div className="relative z-10 mx-auto -mt-28 w-full max-w-6xl px-5 pb-20 sm:px-8">
         <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
           {/* POSTER */}
           <div className="mx-auto w-full max-w-[220px] lg:mx-0">
@@ -89,7 +85,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
               />
             )}
 
-            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-5xl">
+            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-black dark:text-white sm:text-5xl">
               {movie.title}
             </h1>
 
@@ -217,6 +213,6 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
           </section>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
