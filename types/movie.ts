@@ -38,4 +38,6 @@ export interface Movie {
   director?: string | null;
   cast?: string[];
   genreIds?: number[];
+  trailerKey?: string | null;
+  trailerName?: string | null;
 }

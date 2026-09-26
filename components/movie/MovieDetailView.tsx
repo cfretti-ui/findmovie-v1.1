@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 
 import type { Movie } from "@/types/movie";
@@ -10,6 +11,13 @@ import { fadeUp, motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
 
 export function MovieDetailView({ movie }: { movie: Movie }) {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [movie.id]);
   const { t } = useLocale();
 
   const rating =
@@ -19,6 +27,10 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
 
   const backdropUrl = getBackdropUrl(movie.backdropPath);
   const posterUrl = getPosterUrl(movie.posterPath);
+
+  const trailerUrl = movie.trailerKey
+    ? `https://www.youtube.com/embed/${movie.trailerKey}?rel=0&modestbranding=1`
+    : null;
 
   return (
     <motion.div
@@ -93,7 +105,9 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
               {movie.runtime > 0 && (
                 <>
                   <span className="text-border">•</span>
-                  <span>{t("movie.minutes", { count: movie.runtime })}</span>
+                  <span>
+                    {t("movie.minutes", { count: movie.runtime })}
+                  </span>
                 </>
               )}
 
@@ -103,6 +117,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
                   <span className="flex items-center gap-1.5">
                     <span className="text-foreground">★</span>
                     <span>{rating}</span>
+
                     {movie.voteCount ? (
                       <span className="text-muted/70">
                         ({t("movie.votes", { count: movie.voteCount })})
@@ -131,6 +146,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/40 dark:text-white/40">
                   {t("movie.overview")}
                 </p>
+
                 <p className="mt-3 max-w-3xl text-[16px] leading-7 text-black/70 dark:text-white/70">
                   {movie.synopsis}
                 </p>
@@ -160,6 +176,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/40 dark:text-white/40">
                   {t("movie.availableOn")}
                 </p>
+
                 <div className="mt-3 flex flex-wrap gap-2">
                   {movie.streamingServices.map((service) => (
                     <span
@@ -180,6 +197,25 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
             </div>
           </div>
         </div>
+
+        {/* TRAILER */}
+        {trailerUrl && (
+          <section className="mt-16">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-black/40 dark:text-white/40">
+              Bande-annonce
+            </p>
+
+            <div className="relative aspect-video w-full overflow-hidden rounded-[24px] bg-black shadow-2xl ring-1 ring-black/10 dark:ring-white/10">
+              <iframe
+                src={trailerUrl}
+                title={movie.trailerName ?? `Bande-annonce de ${movie.title}`}
+                className="absolute inset-0 h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </section>
+        )}
       </div>
     </motion.div>
   );

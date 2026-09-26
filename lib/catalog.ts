@@ -109,7 +109,7 @@ export async function getMoviePageData(
       const details = await getMovieDetails(
         movieId,
         localeToTmdbLanguage(locale),
-        "credits,release_dates,watch/providers,recommendations,similar",
+        "credits,release_dates,watch/providers,recommendations,similar,videos",
       );
       return mapTmdbDetailsToMovie(
         details,

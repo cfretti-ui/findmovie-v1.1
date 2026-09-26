@@ -60,6 +60,7 @@ export interface TmdbMovieDetails extends Omit<TmdbMovie, "genre_ids"> {
   "watch/providers"?: TmdbWatchProvidersResponse;
   recommendations?: TmdbPaginatedResponse<TmdbMovie>;
   similar?: TmdbPaginatedResponse<TmdbMovie>;
+  videos?: TmdbVideosResponse;
 }
 
 export interface TmdbProductionCompany {

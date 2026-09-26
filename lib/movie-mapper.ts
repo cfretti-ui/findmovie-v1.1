@@ -142,6 +142,36 @@ function withCertification(
   };
 }
 
+function pickTrailer(details: TmdbMovieDetails): {
+  key: string | null;
+  name: string | null;
+} {
+  const videos = details.videos?.results ?? [];
+
+  const youtubeTrailers = videos.filter(
+    (video) =>
+      video.site === "YouTube" &&
+      video.key &&
+      video.type === "Trailer",
+  );
+
+  const officialTrailer =
+    youtubeTrailers.find((video) => video.official) ??
+    youtubeTrailers[0];
+
+  if (!officialTrailer) {
+    return {
+      key: null,
+      name: null,
+    };
+  }
+
+  return {
+    key: officialTrailer.key,
+    name: officialTrailer.name,
+  };
+}
+
 export function mapTmdbDetailsToMovie(
   details: TmdbMovieDetails,
   providers?: TmdbWatchProvidersResponse,
@@ -157,6 +187,7 @@ export function mapTmdbDetailsToMovie(
     mappedProviders.length > 0
       ? mappedProviders
       : pickStreamingServices(details.id);
+  const trailer = pickTrailer(details);
 
   const base: Movie = {
     id: details.id,
@@ -180,6 +211,8 @@ export function mapTmdbDetailsToMovie(
     director: pickDirector(details.credits),
     cast: pickCast(details.credits),
     genreIds: details.genres.map((genre) => genre.id),
+    trailerKey: trailer.key,
+    trailerName: trailer.name,
   };
 
   return withCertification(base, details.release_dates, details.adult);
