@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -62,6 +63,7 @@ function readExcluded(): number[] {
 }
 
 export function QuestionnaireProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [answers, setAnswers] = useState<QuestionnaireAnswers>(
     initialQuestionnaireAnswers,
   );
@@ -69,10 +71,15 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setAnswers(readStoredAnswers());
+    if (pathname === "/questionnaire") {
+      setAnswers(initialQuestionnaireAnswers);
+      sessionStorage.removeItem(STORAGE_KEY);
+    } else {
+      setAnswers(readStoredAnswers());
+    }
     setExcludedMovieIds(readExcluded());
     setHydrated(true);
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (!hydrated) return;

@@ -24,7 +24,7 @@ export function QuestionnaireFlow() {
 
   const selectedValues = useMemo(() => {
     if (MULTI_IDS.includes(question.id as MultiQuestionId)) return answers[question.id as MultiQuestionId] as string[];
-    const value = answers[question.id as Exclude<QuestionId, MultiQuestionId>];
+    const value = question.id === "mood" ? answers.mood : question.id === "watchingWith" ? answers.watchingWith : question.id === "streamingServices" ? answers.streamingServices : question.id === "genres" ? answers.genres : question.id === "allowAdult" ? answers.allowAdult : null;
     return value ? [String(value)] : [];
   }, [answers, question.id]);
 

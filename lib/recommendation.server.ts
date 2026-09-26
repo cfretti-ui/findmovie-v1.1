@@ -79,7 +79,7 @@ async function recommendFromTmdb(answers: QuestionnaireAnswers, excludeIds: numb
   const shortlist = diversify(preRanked, 12).map((x) => x.movie);
   const hydrated = await hydrateCandidates(shortlist, language, region);
   const filtered = filterCandidates(hydrated, answers, excludeIds);
-  const ranked = rankMovies(filtered.length ? filtered : hydrated, answers);
+  const ranked = rankMovies(filtered, answers);
   const diversified = diversify(ranked, 7);
   const winner = diversified[0];
   if (!winner) throw new TmdbApiError("No candidates left after ranking.");
@@ -91,7 +91,7 @@ async function recommendFromTmdb(answers: QuestionnaireAnswers, excludeIds: numb
 function recommendFromFallback(answers: QuestionnaireAnswers, excludeIds: number[]): RecommendationResult {
   const catalog = getFallbackMovies();
   const filtered = filterCandidates(catalog, answers, excludeIds);
-  const ranked = rankMovies(filtered.length ? filtered : catalog, answers);
+  const ranked = rankMovies(filtered, answers);
   const diversified = diversify(ranked, 7);
   const winner = diversified[0];
   if (!winner) throw new Error("Fallback catalog is empty. Run npm run build:fallback.");
