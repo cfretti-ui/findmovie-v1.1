@@ -22,6 +22,7 @@ interface RecommendationCardProps {
   reasons: ReasonToken[];
   onWatched: () => void;
   onAnother: () => void;
+  onViewMovie: () => void;
   onRestart: () => void;
 }
 
@@ -30,6 +31,7 @@ export function RecommendationCard({
   reasons,
   onWatched,
   onAnother,
+  onViewMovie,
   onRestart,
 }: RecommendationCardProps) {
   const { t } = useLocale();
@@ -180,21 +182,29 @@ export function RecommendationCard({
             )}
 
             {/* ACTIONS */}
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-3">
               <Button
-                onClick={onWatched}
-                className="min-h-12 flex-1"
+                onClick={onViewMovie}
+                className="min-h-12 w-full"
               >
-                {t("recommendation.watched")}
+                Voir la fiche du film
               </Button>
-
-              <Button
-                variant="secondary"
-                onClick={onAnother}
-                className="min-h-12 flex-1"
-              >
-                {t("recommendation.another")}
-              </Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button
+                  variant="secondary"
+                  onClick={onWatched}
+                  className="min-h-12 flex-1"
+                >
+                  {t("recommendation.watched")}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={onAnother}
+                  className="min-h-12 flex-1"
+                >
+                  {t("recommendation.another")}
+                </Button>
+              </div>
             </div>
 
             {/* RESTART */}

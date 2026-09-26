@@ -76,6 +76,21 @@ export function RecommendationView() {
     setSeed((value) => value + 1);
   };
 
+  const handleViewMovie = () => {
+    if (movie) {
+      router.push(`/movie/${movie.id}`);
+    }
+  };
+  const handleWatched = () => {
+    if (movie) {
+      excludeMovie(movie.id);
+    }
+
+    setSeed((value) => value + 1);
+  };
+
+
+
   const handleRestart = () => {
     reset();
     router.push("/questionnaire");
@@ -155,6 +170,7 @@ export function RecommendationView() {
                   reasons={reasons}
                   onWatched={handleAnother}
                   onAnother={handleAnother}
+                  onViewMovie={handleViewMovie}
                   onRestart={handleRestart}
                 />
               </motion.div>

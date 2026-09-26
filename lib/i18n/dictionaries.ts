@@ -60,14 +60,22 @@ type Dictionary = {
     incompleteTitle: string;
     incompleteBody: string;
     continueQuestionnaire: string;
+    back: string;
+    eyebrow: string;
+    title: string;
+    subtitle: string;
     yourRecommendation: string;
+    yourMatch: string;
     another: string;
     watched: string;
     restart: string;
+    why: string;
     whyTitle: string;
     whyIntro: string;
     alsoLike: string;
     loading: string;
+    noResult: string;
+    noResultSubtitle: string;
     error: string;
     viewDetails: string;
   };
@@ -206,14 +214,23 @@ const en: Dictionary = {
     incompleteBody:
       "Answer a few questions so we can match the right film to your mood.",
     continueQuestionnaire: "Continue questionnaire",
+    back: "Back",
+    eyebrow: "Your match",
+    title: "Your next film",
+    subtitle: "A film selected according to your answers.",
     yourRecommendation: "Your recommendation",
+    yourMatch: "Your match",
     another: "Another recommendation",
     watched: "I've watched it",
     restart: "Restart questionnaire",
+    why: "Why this film?",
     whyTitle: "Why we recommended {title}",
     whyIntro: "We recommended {title} because:",
     alsoLike: "You might also like",
     loading: "Finding the right film…",
+    noResult: "No recommendation found",
+    noResultSubtitle:
+      "We couldn't find another film matching your preferences.",
     error: "We couldn’t find a match right now. Try again in a moment.",
     viewDetails: "View film",
   },
@@ -420,14 +437,23 @@ const fr: Dictionary = {
     incompleteBody:
       "Répondez à quelques questions pour trouver le film adapté à votre humeur.",
     continueQuestionnaire: "Continuer le questionnaire",
+    back: "Retour",
+    eyebrow: "Votre sélection",
+    title: "Votre prochain film",
+    subtitle: "Un film sélectionné selon vos réponses.",
     yourRecommendation: "Votre recommandation",
+    yourMatch: "Votre sélection",
     another: "Autre recommandation",
     watched: "Je l’ai déjà vu",
     restart: "Recommencer le questionnaire",
+    why: "Pourquoi ce film ?",
     whyTitle: "Pourquoi nous avons recommandé {title}",
     whyIntro: "Nous avons recommandé {title} parce que :",
     alsoLike: "Vous pourriez aussi aimer",
     loading: "Recherche du bon film…",
+    noResult: "Aucune recommandation trouvée",
+    noResultSubtitle:
+      "Nous n’avons pas trouvé d’autre film correspondant à vos préférences.",
     error: "Impossible de trouver une correspondance pour le moment.",
     viewDetails: "Voir la fiche",
   },
@@ -634,14 +660,23 @@ const es: Dictionary = {
     incompleteBody:
       "Responde unas preguntas para encontrar la película adecuada a tu humor.",
     continueQuestionnaire: "Continuar el cuestionario",
+    back: "Volver",
+    eyebrow: "Tu selección",
+    title: "Tu próxima película",
+    subtitle: "Una película seleccionada según tus respuestas.",
     yourRecommendation: "Tu recomendación",
+    yourMatch: "Tu selección",
     another: "Otra recomendación",
     watched: "Ya la he visto",
     restart: "Reiniciar el cuestionario",
+    why: "¿Por qué esta película?",
     whyTitle: "Por qué recomendamos {title}",
     whyIntro: "Recomendamos {title} porque:",
     alsoLike: "También te puede gustar",
     loading: "Buscando la película adecuada…",
+    noResult: "No se ha encontrado ninguna recomendación",
+    noResultSubtitle:
+      "No hemos encontrado otra película que coincida con tus preferencias.",
     error: "No hemos podido encontrar una coincidencia ahora mismo.",
     viewDetails: "Ver ficha",
   },
