@@ -85,6 +85,7 @@ export async function searchCatalogMovies(
     );
     return response.results
       .filter((movie) => Boolean(movie.poster_path))
+      .sort((a, b) => b.popularity - a.popularity)
       .slice(0, 12)
       .map(mapTmdbSummaryToMovie);
   } catch (error) {

@@ -25,7 +25,7 @@ export function Navbar() {
   useEffect(() => {
     const trimmed = query.trim();
 
-    if (!trimmed) {
+    if (!trimmed || pathname === "/search") {
       setResults([]);
       setLoading(false);
       return;
@@ -64,7 +64,7 @@ export function Navbar() {
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [query, locale]);
+  }, [query, locale, pathname]);
   
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -165,126 +165,137 @@ export function Navbar() {
         </div>
 
         {/* SEARCH */}
-        <div className="relative mx-3 flex min-w-0 flex-1 justify-center sm:mx-8">
-          <div className="relative w-full max-w-md">
-            <div
-              className={`flex h-10 items-center rounded-xl border px-3 transition-all ${
-                focused
-                  ? "border-black/15 bg-black/[0.055] shadow-sm dark:border-white/15 dark:bg-white/[0.075]"
-                  : "border-black/[0.06] bg-black/[0.035] dark:border-white/[0.07] dark:bg-white/[0.05]"
-              }`}
-            >
-              <span className="mr-2 shrink-0 text-base text-muted">
-                ⌕
-              </span>
+        {/* SEARCH */}
+        {pathname !== "/search" ? (
+          <div className="relative mx-3 flex min-w-0 flex-1 justify-center sm:mx-8">
+            <div className="relative w-full max-w-md">
+              <div
+                className={`flex h-10 items-center rounded-xl border px-3 transition-all ${
+                  focused
+                    ? "border-black/15 bg-black/[0.055] shadow-sm dark:border-white/15 dark:bg-white/[0.075]"
+                    : "border-black/[0.06] bg-black/[0.035] dark:border-white/[0.07] dark:bg-white/[0.05]"
+                }`}
+              >
+                <span className="mr-2 shrink-0 text-base text-muted">
+                  ⌕
+                </span>
 
-              <input
-                ref={inputRef}
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                onFocus={() => setFocused(true)}
-                onBlur={() => {
-                  window.setTimeout(() => setFocused(false), 150);
-                }}
-                placeholder={t("search.placeholder")}
-                aria-label={t("search.placeholder")}
-                className="min-w-0 flex-1 bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted"
-              />
+                <input
+                  ref={inputRef}
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => {
+                    window.setTimeout(() => setFocused(false), 150);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && query.trim()) {
+                      window.location.href = `/search?q=${encodeURIComponent(
+                        query.trim(),
+                      )}`;
+                    }
+                  }}
+                  placeholder={t("search.placeholder")}
+                  aria-label={t("search.placeholder")}
+                  className="min-w-0 flex-1 appearance-none bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
+                />
 
-              {loading ? (
-                <div className="ml-2 h-3.5 w-3.5 shrink-0 animate-spin rounded-full border border-black/15 border-t-black dark:border-white/15 dark:border-t-white" />
-              ) : (
-                <kbd className="ml-2 hidden shrink-0 rounded-md border border-black/10 px-1.5 py-0.5 text-[10px] text-muted sm:block dark:border-white/10">
-                  ⌘ K
-                </kbd>
-              )}
+                {loading ? (
+                  <div className="ml-2 h-3.5 w-3.5 shrink-0 animate-spin rounded-full border border-black/15 border-t-black dark:border-white/15 dark:border-t-white" />
+                ) : (
+                  <kbd className="ml-2 hidden shrink-0 rounded-md border border-black/10 px-1.5 py-0.5 text-[10px] text-muted sm:block dark:border-white/10">
+                    ⌘ K
+                  </kbd>
+                )}
+              </div>
+
+              <AnimatePresence>
+                {showResults && (
+                  <motion.div
+                    initial={{
+                      opacity: 0,
+                      y: -5,
+                      scale: 0.98,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -5,
+                      scale: 0.98,
+                    }}
+                    transition={{
+                      duration: 0.18,
+                    }}
+                    className="absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-2xl border border-black/[0.08] bg-white/90 p-1.5 shadow-2xl backdrop-blur-2xl dark:border-white/[0.1] dark:bg-[#171719]/95"
+                  >
+                    {results.length > 0 ? (
+                      <div className="max-h-[420px] overflow-y-auto">
+                        {results.map((movie) => (
+                          <Link
+                            key={movie.id}
+                            href={`/movie/${movie.id}`}
+                            onClick={() => {
+                              setQuery("");
+                              setFocused(false);
+                            }}
+                            className="group flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                          >
+                            <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg bg-black/10 dark:bg-white/10">
+                              {movie.posterPath ? (
+                                <Image
+                                  src={getPosterUrl(movie.posterPath)}
+                                  alt=""
+                                  fill
+                                  sizes="40px"
+                                  className="object-cover"
+                                />
+                              ) : null}
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-semibold text-foreground">
+                                {movie.title}
+                              </p>
+
+                              <p className="mt-0.5 truncate text-xs text-muted">
+                                {movie.year > 0 ? movie.year : ""}
+                                {movie.year > 0 && movie.imdbRating > 0
+                                  ? " · "
+                                  : ""}
+                                {movie.imdbRating > 0
+                                  ? `★ ${movie.imdbRating.toFixed(1)}`
+                                  : ""}
+                              </p>
+                            </div>
+
+                            <span className="mr-1 text-muted opacity-0 transition-opacity group-hover:opacity-100">
+                              →
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : loading ? (
+                      <div className="px-4 py-5 text-center text-sm text-muted">
+                        Searching…
+                      </div>
+                    ) : (
+                      <div className="px-4 py-5 text-center text-sm text-muted">
+                        No movies found.
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-
-            <AnimatePresence>
-              {showResults && (
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                    y: -5,
-                    scale: 0.98,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    y: -5,
-                    scale: 0.98,
-                  }}
-                  transition={{
-                    duration: 0.18,
-                  }}
-                  className="absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-2xl border border-black/[0.08] bg-white/90 p-1.5 shadow-2xl backdrop-blur-2xl dark:border-white/[0.1] dark:bg-[#171719]/95"
-                >
-                  {results.length > 0 ? (
-                    <div className="max-h-[420px] overflow-y-auto">
-                      {results.map((movie) => (
-                        <Link
-                          key={movie.id}
-                          href={`/movie/${movie.id}`}
-                          onClick={() => {
-                            setQuery("");
-                            setFocused(false);
-                          }}
-                          className="group flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
-                        >
-                          <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded-lg bg-black/10 dark:bg-white/10">
-                            {movie.posterPath ? (
-                              <Image
-                                src={getPosterUrl(movie.posterPath)}
-                                alt=""
-                                fill
-                                sizes="40px"
-                                className="object-cover"
-                              />
-                            ) : null}
-                          </div>
-
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-foreground">
-                              {movie.title}
-                            </p>
-
-                            <p className="mt-0.5 truncate text-xs text-muted">
-                              {movie.year > 0 ? movie.year : ""}
-                              {movie.year > 0 && movie.imdbRating > 0
-                                ? " · "
-                                : ""}
-                              {movie.imdbRating > 0
-                                ? `★ ${movie.imdbRating.toFixed(1)}`
-                                : ""}
-                            </p>
-                          </div>
-
-                          <span className="mr-1 text-muted opacity-0 transition-opacity group-hover:opacity-100">
-                            →
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : loading ? (
-                    <div className="px-4 py-5 text-center text-sm text-muted">
-                      Searching…
-                    </div>
-                  ) : (
-                    <div className="px-4 py-5 text-center text-sm text-muted">
-                      No movies found.
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
-        </div>
-
+        ) : (
+          <div className="flex-1" />
+        )}
         {/* RIGHT */}
         <nav
           className="flex items-center gap-1"
