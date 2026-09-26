@@ -19,7 +19,7 @@ export function Navbar() {
   const [results, setResults] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
-
+  const [menuOpen, setMenuOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -116,12 +116,44 @@ export function Navbar() {
 
         {/* LEFT */}
         <div className="flex min-w-0 items-center gap-2">
-          <button
+        <button
             type="button"
-            aria-label="Open menu"
-            className="fm-focus-ring flex h-10 w-10 items-center justify-center rounded-xl text-muted transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+            className="fm-focus-ring relative flex h-10 w-10 items-center justify-center rounded-xl text-muted transition-colors hover:bg-black/5 dark:hover:bg-white/5"
           >
-            <span className="text-lg leading-none">☰</span>
+            <span className="relative flex h-4 w-4 items-center justify-center">
+              <motion.span
+                animate={
+                  menuOpen
+                    ? { rotate: 45, y: 0 }
+                    : { rotate: 0, y: -5 }
+                }
+                transition={{ duration: 0.2 }}
+                className="absolute h-[1.5px] w-4 rounded-full bg-current"
+              />
+
+              <motion.span
+                animate={
+                  menuOpen
+                    ? { opacity: 0 }
+                    : { opacity: 1, y: 0 }
+                }
+                transition={{ duration: 0.15 }}
+                className="absolute h-[1.5px] w-4 rounded-full bg-current"
+              />
+
+              <motion.span
+                animate={
+                  menuOpen
+                    ? { rotate: -45, y: 0 }
+                    : { rotate: 0, y: 5 }
+                }
+                transition={{ duration: 0.2 }}
+                className="absolute h-[1.5px] w-4 rounded-full bg-current"
+              />
+            </span>
           </button>
 
           <Link
@@ -288,6 +320,111 @@ export function Navbar() {
           </Link>
         </nav>
       </div>
+      <AnimatePresence>
+      {menuOpen && (
+        <>
+          {/* BACKDROP */}
+          <motion.button
+            type="button"
+            aria-label="Close menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 -z-10 bg-black/10 backdrop-blur-[2px] dark:bg-black/30"
+          />
+
+          {/* MENU */}
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -8,
+              scale: 0.96,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }}
+            exit={{
+              opacity: 0,
+              y: -8,
+              scale: 0.96,
+            }}
+            transition={{
+              duration: 0.2,
+              ease: motionEase,
+            }}
+            className="absolute left-3 top-[calc(100%+8px)] w-[250px] overflow-hidden rounded-[24px] border border-black/[0.08] bg-white/80 p-2 shadow-2xl backdrop-blur-2xl dark:border-white/[0.1] dark:bg-[#171719]/85 sm:left-5"
+          >
+            <div className="px-3 pb-2 pt-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/35 dark:text-white/35">
+                FindMovie
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <Link
+                href="/"
+                onClick={() => setMenuOpen(false)}
+                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                  ⌂
+                </span>
+
+                <span className="text-sm font-medium text-foreground">
+                  Accueil
+                </span>
+              </Link>
+
+              <Link
+                href="/questionnaire"
+                onClick={() => setMenuOpen(false)}
+                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                  ✦
+                </span>
+
+                <span className="text-sm font-medium text-foreground">
+                  Questionnaire
+                </span>
+              </Link>
+
+              <Link
+                href="/search"
+                onClick={() => setMenuOpen(false)}
+                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                  ⌕
+                </span>
+
+                <span className="text-sm font-medium text-foreground">
+                  Recherche
+                </span>
+              </Link>
+
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                  ◯
+                </span>
+
+                <span className="text-sm font-medium text-foreground">
+                  Connexion
+                </span>
+              </Link>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
     </motion.header>
   );
 }
