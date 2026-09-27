@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -14,6 +14,7 @@ import type { User } from "@supabase/supabase-js";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t, locale } = useLocale();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Movie[]>([]);
@@ -140,6 +141,8 @@ export function Navbar() {
 
     setProfileOpen(false);
     setUser(null);
+    router.push("/");
+    router.refresh();
   }
 
   const displayName =

@@ -9,6 +9,8 @@ import { AgeBadge } from "@/components/movie/AgeBadge";
 import { Button } from "@/components/ui/Button";
 import { fadeUp, motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { MovieRating } from "./MovieRating";
+import { FavoriteButton } from "@/components/movie/FavoriteButton";
 
 export function MovieDetailView({ movie }: { movie: Movie }) {
   useEffect(() => {
@@ -85,9 +87,12 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
               />
             )}
 
-            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-black dark:text-white sm:text-5xl">
-              {movie.title}
-            </h1>
+            <div className="flex items-start gap-4">
+              <h1 className="min-w-0 flex-1 text-3xl font-semibold tracking-[-0.03em] text-black dark:text-white sm:text-5xl">
+                {movie.title}
+              </h1>
+              <FavoriteButton movieId={movie.id} />
+            </div>
 
             {movie.originalTitle && movie.originalTitle !== movie.title ? (
               <p className="mt-1.5 text-sm text-muted">
@@ -142,13 +147,11 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/40 dark:text-white/40">
                   {t("movie.overview")}
                 </p>
-
                 <p className="mt-3 max-w-3xl text-[16px] leading-7 text-black/70 dark:text-white/70">
                   {movie.synopsis}
                 </p>
               </section>
             )}
-
             {movie.director && (
               <p className="mt-6 text-sm text-muted">
                 <span className="font-semibold text-foreground">
@@ -167,7 +170,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
               </p>
             )}
 
-            {movie.streamingServices.length > 0 && (
+              {movie.streamingServices.length > 0 && (
               <section className="mt-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/40 dark:text-white/40">
                   {t("movie.availableOn")}
@@ -185,7 +188,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
                 </div>
               </section>
             )}
-
+            <MovieRating movieId={movie.id} />
             <div className="mt-10">
               <Button href="/" variant="secondary">
                 {t("movie.backHome")}
