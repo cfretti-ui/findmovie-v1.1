@@ -122,7 +122,6 @@ type Dictionary = {
     director: string;
     cast: string;
     originalTitle: string;
-    rating: string;
     votes: string;
     availableOn: string;
     overview: string;
@@ -130,6 +129,13 @@ type Dictionary = {
     notFound: string;
     backHome: string;
     minutes: string;
+    ratingEyebrow: string;
+    ratingQuestion: string;
+    rating: {
+      disliked: string;
+      liked: string;
+      loved: string;
+};
   };
   age: {
     all: string;
@@ -305,7 +311,13 @@ const en: Dictionary = {
     director: "Director",
     cast: "Cast",
     originalTitle: "Original title",
-    rating: "TMDb rating",
+    ratingEyebrow: "Your rating",
+    ratingQuestion: "What did you think of this movie?",
+    rating: {
+      disliked: "I didn't like it",
+      liked: "I liked it",
+      loved: "I loved it",
+    },
     votes: "{count} votes",
     availableOn: "Available on",
     overview: "Overview",
@@ -556,7 +568,13 @@ const fr: Dictionary = {
     director: "Réalisateur",
     cast: "Acteurs",
     originalTitle: "Titre original",
-    rating: "Note TMDb",
+    ratingEyebrow: "Votre avis",
+    ratingQuestion: "Qu’avez-vous pensé de ce film ?",
+    rating: {
+      disliked: "Je n’ai pas aimé",
+      liked: "J’ai aimé",
+     loved: "J’adore",
+    },
     votes: "{count} votes",
     availableOn: "Disponible sur",
     overview: "Synopsis",
@@ -807,7 +825,13 @@ const es: Dictionary = {
     director: "Director",
     cast: "Reparto",
     originalTitle: "Título original",
-    rating: "Nota TMDb",
+    ratingEyebrow: "Tu opinión",
+    ratingQuestion: "¿Qué te pareció esta película?",
+    rating: {
+      disliked: "No me gustó",
+      liked: "Me gustó",
+      loved: "Me encantó",
+    },
     votes: "{count} votos",
     availableOn: "Disponible en",
     overview: "Sinopsis",

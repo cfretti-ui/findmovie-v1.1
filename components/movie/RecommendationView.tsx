@@ -1,20 +1,18 @@
 "use client";
-
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuestionnaire } from "@/lib/questionnaire-context";
 import { RecommendationCard } from "@/components/movie/RecommendationCard";
+import { MovieRating } from "@/components/movie/MovieRating";
 import { Button } from "@/components/ui/Button";
 import { fadeIn, motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
 import type { Movie } from "@/types/movie";
 import type { ReasonToken } from "@/lib/scoring";
-
 export function RecommendationView() {
   const router = useRouter();
   const { t } = useLocale();
-
   const {
     answers,
     excludedMovieIds,
@@ -22,17 +20,13 @@ export function RecommendationView() {
     reset,
     isComplete,
   } = useQuestionnaire();
-
   const [seed, setSeed] = useState(0);
   const [movie, setMovie] = useState<Movie | null>(null);
   const [reasons, setReasons] = useState<ReasonToken[]>([]);
   const [loading, setLoading] = useState(false);
-
   const fetchRecommendation = useCallback(async () => {
     if (!isComplete) return;
-
     setLoading(true);
-
     try {
       const response = await fetch("/api/recommend", {
         method: "POST",
@@ -44,16 +38,13 @@ export function RecommendationView() {
           excludeIds: excludedMovieIds,
         }),
       });
-
       if (!response.ok) {
         throw new Error("Recommendation failed");
       }
-
       const data = (await response.json()) as {
         movie: Movie;
         reasons: ReasonToken[];
       };
-
       setMovie(data.movie);
       setReasons(data.reasons);
     } catch {
@@ -63,19 +54,15 @@ export function RecommendationView() {
       setLoading(false);
     }
   }, [answers, excludedMovieIds, isComplete]);
-
   useEffect(() => {
     fetchRecommendation();
   }, [fetchRecommendation, seed]);
-
   const handleAnother = () => {
     if (movie) {
       excludeMovie(movie.id);
     }
-
     setSeed((value) => value + 1);
   };
-
   const handleViewMovie = () => {
     if (movie) {
       router.push(`/movie/${movie.id}`);
@@ -85,27 +72,20 @@ export function RecommendationView() {
     if (movie) {
       excludeMovie(movie.id);
     }
-
     setSeed((value) => value + 1);
   };
-
-
-
   const handleRestart = () => {
     reset();
     router.push("/questionnaire");
   };
-
   useEffect(() => {
     if (!isComplete) {
       router.replace("/questionnaire");
     }
   }, [isComplete, router]);
-
   if (!isComplete) {
     return null;
   }
-
   return (
     <main className="min-h-screen px-6 py-12 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-6xl">
@@ -119,26 +99,21 @@ export function RecommendationView() {
             <Button variant="ghost" onClick={() => router.push("/")}>
               {t("recommendation.back")}
             </Button>
-
             <Button variant="ghost" onClick={handleRestart}>
               {t("recommendation.restart")}
             </Button>
           </div>
-
           <div className="mb-10 text-center">
             <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-black/45 dark:text-white/45">
               {t("recommendation.eyebrow")}
             </p>
-
             <h1 className="text-4xl font-semibold tracking-[-0.04em] text-black dark:text-white sm:text-5xl">
               {t("recommendation.title")}
             </h1>
-
             <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-black/55 dark:text-white/55">
               {t("recommendation.subtitle")}
             </p>
           </div>
-
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div
@@ -150,7 +125,6 @@ export function RecommendationView() {
               >
                 <div className="text-center">
                   <div className="mx-auto mb-5 h-10 w-10 animate-spin rounded-full border-2 border-black/10 border-t-black dark:border-white/10 dark:border-t-white" />
-
                   <p className="text-sm text-black/50 dark:text-white/50">
                     {t("recommendation.loading")}
                   </p>
@@ -173,6 +147,9 @@ export function RecommendationView() {
                   onViewMovie={handleViewMovie}
                   onRestart={handleRestart}
                 />
+                <div className="mx-auto max-w-2xl">
+                  <MovieRating movieId={movie.id} />
+                </div>
               </motion.div>
             ) : (
               <motion.div
@@ -185,11 +162,9 @@ export function RecommendationView() {
                   <h2 className="text-2xl font-semibold tracking-tight">
                     {t("recommendation.noResult")}
                   </h2>
-
                   <p className="mt-3 text-black/50 dark:text-white/50">
                     {t("recommendation.noResultSubtitle")}
                   </p>
-
                   <div className="mt-6">
                     <Button onClick={handleRestart}>
                       {t("recommendation.restart")}
