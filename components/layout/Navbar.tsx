@@ -5,22 +5,43 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-
 import { motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { getPosterUrl } from "@/lib/tmdb-images";
+import { createClient } from "@/lib/supabase/client";
 import type { Movie } from "@/types/movie";
+import type { User } from "@supabase/supabase-js";
 
 export function Navbar() {
   const pathname = usePathname();
   const { t, locale } = useLocale();
-
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -49,7 +70,6 @@ export function Navbar() {
         }
 
         const data = (await response.json()) as Movie[];
-
         setResults(data);
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
@@ -65,7 +85,7 @@ export function Navbar() {
       controller.abort();
     };
   }, [query, locale, pathname]);
-  
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -75,6 +95,9 @@ export function Navbar() {
 
       if (event.key === "Escape") {
         setQuery("");
+        setFocused(false);
+        setMenuOpen(false);
+        setProfileOpen(false);
         inputRef.current?.blur();
       }
     }
@@ -86,20 +109,46 @@ export function Navbar() {
     };
   }, []);
 
-  const showResults =
-    focused && query.trim().length > 0;
+  useEffect(() => {
+    setMenuOpen(false);
+    setProfileOpen(false);
+  }, [pathname]);
 
-  const links = [
-    {
-      href: "/about",
-      label: t("nav.about"),
-    },
-    {
-      href: "/#premium",
-      label: t("nav.premium"),
-      soon: true,
-    },
-  ];
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const showResults = focused && query.trim().length > 0;
+
+  async function handleLogout() {
+    const supabase = createClient();
+
+    await supabase.auth.signOut();
+
+    setProfileOpen(false);
+    setUser(null);
+  }
+
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Profil";
+
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   return (
     <motion.header
@@ -112,15 +161,17 @@ export function Navbar() {
       className="sticky top-0 z-50 px-3 pt-3 sm:px-5"
     >
       <div className="relative mx-auto flex h-14 w-full max-w-7xl items-center justify-between rounded-[20px] px-3 sm:h-16 sm:px-4">
-  <div className="glass-surface-bg" />
+        <div className="glass-surface-bg" />
 
-        {/* LEFT */}
         <div className="flex min-w-0 items-center gap-2">
-        <button
+          <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => {
+              setMenuOpen((open) => !open);
+              setProfileOpen(false);
+            }}
             className="fm-focus-ring relative flex h-10 w-10 items-center justify-center rounded-xl text-muted transition-colors hover:bg-black/5 dark:hover:bg-white/5"
           >
             <span className="relative flex h-4 w-4 items-center justify-center">
@@ -133,7 +184,6 @@ export function Navbar() {
                 transition={{ duration: 0.2 }}
                 className="absolute h-[1.5px] w-4 rounded-full bg-current"
               />
-
               <motion.span
                 animate={
                   menuOpen
@@ -143,7 +193,6 @@ export function Navbar() {
                 transition={{ duration: 0.15 }}
                 className="absolute h-[1.5px] w-4 rounded-full bg-current"
               />
-
               <motion.span
                 animate={
                   menuOpen
@@ -164,8 +213,6 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* SEARCH */}
-        {/* SEARCH */}
         {pathname !== "/search" ? (
           <div className="relative mx-3 flex min-w-0 flex-1 justify-center sm:mx-8">
             <div className="relative w-full max-w-md">
@@ -296,146 +343,248 @@ export function Navbar() {
         ) : (
           <div className="flex-1" />
         )}
-        {/* RIGHT */}
+
         <nav
           className="flex items-center gap-1"
           aria-label="Primary"
         >
-          {links.map((link) => (
+          {user ? (
+            <div ref={profileRef} className="relative">
+              <button
+                type="button"
+                aria-label="Profile"
+                aria-expanded={profileOpen}
+                onClick={() => {
+                  setProfileOpen((open) => !open);
+                  setMenuOpen(false);
+                }}
+                className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-black/[.08] bg-white/55 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-white/80 hover:scale-[1.02] dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/15"
+              >
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span>
+                    {displayName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{
+                      opacity: 0,
+                      y: -6,
+                      scale: 0.97,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      scale: 0.97,
+                    }}
+                    transition={{
+                      duration: 0.18,
+                      ease: motionEase,
+                    }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-[250px] overflow-hidden rounded-[24px] border border-black/[0.08] bg-white/85 p-2 shadow-2xl backdrop-blur-2xl dark:border-white/[0.1] dark:bg-[#171719]/90"
+                  >
+                    <div className="px-3 pb-3 pt-2">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {displayName}
+                      </p>
+
+                      <p className="mt-0.5 truncate text-xs text-muted">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <div className="mb-1 border-t border-black/[0.07] dark:border-white/[0.08]" />
+
+                    <div className="space-y-1">
+                      <Link
+                        href="/profile"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 rounded-[16px] px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                          ◯
+                        </span>
+                        Profil
+                      </Link>
+
+                      <Link
+                        href="/favorites"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 rounded-[16px] px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                          ♥
+                        </span>
+                        Mes favoris
+                      </Link>
+
+                      <Link
+                        href="/watched"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 rounded-[16px] px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                          ✓
+                        </span>
+                        Films vus
+                      </Link>
+
+                      <Link
+                        href="/settings"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 rounded-[16px] px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                          ⚙
+                        </span>
+                        Réglages
+                      </Link>
+                    </div>
+
+                    <div className="my-1 border-t border-black/[0.07] dark:border-white/[0.08]" />
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 rounded-[16px] px-3 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/[0.08] dark:text-red-400 dark:hover:bg-red-500/[0.1]"
+                    >
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/[0.07] text-sm dark:bg-red-500/[0.1]">
+                        ↪
+                      </span>
+                      Déconnexion
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
             <Link
-              key={link.href}
-              href={link.href}
-              aria-disabled={link.soon || undefined}
-              className={`hidden rounded-xl px-3 py-2 text-[13px] font-medium transition-colors sm:block ${
-                pathname === link.href
-                  ? "text-foreground"
-                  : "text-muted hover:text-foreground"
-              } ${link.soon ? "opacity-60" : ""}`}
+              href="/login"
+              className="rounded-xl px-3 py-2 text-[13px] font-medium text-foreground transition-colors hover:bg-black/5 dark:hover:bg-white/5"
             >
-              {link.label}
-
-              {link.soon ? (
-                <span className="ml-1 text-[10px]">
-                  {t("nav.soon")}
-                </span>
-              ) : null}
+              Connexion
             </Link>
-          ))}
-
-          <Link
-            href="/questionnaire"
-            aria-label="Profile"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/[.08] bg-white/55 text-sm text-foreground shadow-sm transition-colors hover:bg-white/80 dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/15"
-          >
-            ◯
-          </Link>
+          )}
         </nav>
       </div>
+
       <AnimatePresence>
-      {menuOpen && (
-        <>
-          {/* BACKDROP */}
-          <motion.button
-            type="button"
-            aria-label="Close menu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 -z-10 bg-black/10 backdrop-blur-[2px] dark:bg-black/30"
-          />
+        {menuOpen && (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close menu"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 -z-10 bg-black/10 backdrop-blur-[2px] dark:bg-black/30"
+            />
 
-          {/* MENU */}
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: -8,
-              scale: 0.96,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-            }}
-            exit={{
-              opacity: 0,
-              y: -8,
-              scale: 0.96,
-            }}
-            transition={{
-              duration: 0.2,
-              ease: motionEase,
-            }}
-            className="absolute left-3 top-[calc(100%+8px)] w-[250px] overflow-hidden rounded-[24px] border border-black/[0.08] bg-white/80 p-2 shadow-2xl backdrop-blur-2xl dark:border-white/[0.1] dark:bg-[#171719]/85 sm:left-5"
-          >
-            <div className="px-3 pb-2 pt-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/35 dark:text-white/35">
-                FindMovie
-              </p>
-            </div>
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: -8,
+                scale: 0.96,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                y: -8,
+                scale: 0.96,
+              }}
+              transition={{
+                duration: 0.2,
+                ease: motionEase,
+              }}
+              className="absolute left-3 top-[calc(100%+8px)] w-[250px] overflow-hidden rounded-[24px] border border-black/[0.08] bg-white/80 p-2 shadow-2xl backdrop-blur-2xl dark:border-white/[0.1] dark:bg-[#171719]/85 sm:left-5"
+            >
+              <div className="px-3 pb-2 pt-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-black/35 dark:text-white/35">
+                  FindMovie
+                </p>
+              </div>
 
-            <div className="space-y-1">
-              <Link
-                href="/"
-                onClick={() => setMenuOpen(false)}
-                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
-                  ⌂
-                </span>
+              <div className="space-y-1">
+                <Link
+                  href="/"
+                  onClick={() => setMenuOpen(false)}
+                  className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                    ⌂
+                  </span>
+                  <span className="text-sm font-medium text-foreground">
+                    Accueil
+                  </span>
+                </Link>
 
-                <span className="text-sm font-medium text-foreground">
-                  Accueil
-                </span>
-              </Link>
+                <Link
+                  href="/questionnaire"
+                  onClick={() => setMenuOpen(false)}
+                  className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                    ✦
+                  </span>
+                  <span className="text-sm font-medium text-foreground">
+                    Questionnaire
+                  </span>
+                </Link>
 
-              <Link
-                href="/questionnaire"
-                onClick={() => setMenuOpen(false)}
-                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
-                  ✦
-                </span>
+                <Link
+                  href="/search"
+                  onClick={() => setMenuOpen(false)}
+                  className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                    ⌕
+                  </span>
+                  <span className="text-sm font-medium text-foreground">
+                    Recherche
+                  </span>
+                </Link>
 
-                <span className="text-sm font-medium text-foreground">
-                  Questionnaire
-                </span>
-              </Link>
+                <div className="my-2 border-t border-black/[0.07] dark:border-white/[0.08]" />
 
-              <Link
-                href="/search"
-                onClick={() => setMenuOpen(false)}
-                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
-                  ⌕
-                </span>
-
-                <span className="text-sm font-medium text-foreground">
-                  Recherche
-                </span>
-              </Link>
-
-              <Link
-                href="/login"
-                onClick={() => setMenuOpen(false)}
-                className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
-                  ◯
-                </span>
-
-                <span className="text-sm font-medium text-foreground">
-                  Connexion
-                </span>
-              </Link>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+                <Link
+                  href="/about"
+                  onClick={() => setMenuOpen(false)}
+                  className="group flex items-center gap-3 rounded-[16px] px-3 py-3 transition-colors hover:bg-black/[0.05] dark:hover:bg-white/[0.07]"
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] text-sm dark:bg-white/[0.06]">
+                    ℹ
+                  </span>
+                  <span className="text-sm font-medium text-foreground">
+                    À propos
+                  </span>
+                </Link>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }

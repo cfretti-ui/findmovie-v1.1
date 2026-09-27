@@ -10,6 +10,8 @@
     "build:fallback": "node scripts/build-fallback-catalog.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
     "@vercel/analytics": "^2.0.1",
     "axios": "^1.11.0",
     "framer-motion": "^12.42.2",

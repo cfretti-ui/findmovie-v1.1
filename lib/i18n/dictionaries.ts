@@ -6,6 +6,28 @@ type Dictionary = {
     premium: string;
     soon: string;
   };
+  auth: {
+    signIn: string;
+    signUp: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    createAccount: string;
+    alreadyHaveAccount: string;
+    noAccount: string;
+    signInHere: string;
+    signUpHere: string;
+    passwordMismatch: string;
+    passwordTooShort: string;
+    invalidEmail: string;
+    signupError: string;
+    loginError: string;
+    checkEmail: string;
+    checkEmailDescription: string;
+    backHome: string;
+    logout: string;
+    loading: string;
+  };
   footer: {
     tagline: string;
     about: string;
@@ -150,6 +172,28 @@ const en: Dictionary = {
     about: "About",
     premium: "Premium",
     soon: "soon",
+  },
+  auth: {
+    signIn: "Sign in",
+    signUp: "Create an account",
+    email: "Email",
+    password: "Password",
+    confirmPassword: "Confirm password",
+    createAccount: "Create account",
+    alreadyHaveAccount: "Already have an account?",
+    noAccount: "Don't have an account?",
+    signInHere: "Sign in",
+    signUpHere: "Create one",
+    passwordMismatch: "Passwords do not match.",
+    passwordTooShort: "Your password must be at least 6 characters.",
+    invalidEmail: "Please enter a valid email address.",
+    signupError: "We couldn't create your account. Please try again.",
+    loginError: "We couldn't sign you in. Please check your details.",
+    checkEmail: "Check your email",
+    checkEmailDescription: "We've sent you a confirmation link. Check your inbox to activate your FindMovie account.",
+    backHome: "Back to FindMovie",
+    logout: "Sign out",
+    loading: "Creating account…",
   },
   footer: {
     tagline:
@@ -374,6 +418,28 @@ const fr: Dictionary = {
     premium: "Premium",
     soon: "bientôt",
   },
+  auth: {
+    signIn: "Se connecter",
+    signUp: "Créer un compte",
+    email: "Adresse e-mail",
+    password: "Mot de passe",
+    confirmPassword: "Confirmer le mot de passe",
+    createAccount: "Créer mon compte",
+    alreadyHaveAccount: "Vous avez déjà un compte ?",
+    noAccount: "Vous n’avez pas encore de compte ?",
+    signInHere: "Se connecter",
+    signUpHere: "Créer un compte",
+    passwordMismatch: "Les mots de passe ne correspondent pas.",
+    passwordTooShort: "Votre mot de passe doit contenir au moins 6 caractères.",
+    invalidEmail: "Veuillez entrer une adresse e-mail valide.",
+    signupError: "Impossible de créer votre compte. Réessayez.",
+    loginError: "Impossible de vous connecter. Vérifiez vos identifiants.",
+    checkEmail: "Vérifiez votre adresse e-mail",
+    checkEmailDescription: "Nous vous avons envoyé un lien de confirmation. Consultez votre boîte mail pour activer votre compte FindMovie.",
+    backHome: "Retour à FindMovie",
+    logout: "Se déconnecter",
+    loading: "Création du compte…",
+  },
   footer: {
     tagline:
       "Votre prochain film préféré, selon votre humeur et vos plateformes — en moins d’une minute.",
@@ -596,6 +662,28 @@ const es: Dictionary = {
     about: "Acerca de",
     premium: "Premium",
     soon: "pronto",
+  },
+  auth: {
+    signIn: "Iniciar sesión",
+    signUp: "Crear una cuenta",
+    email: "Correo electrónico",
+    password: "Contraseña",
+    confirmPassword: "Confirmar contraseña",
+    createAccount: "Crear cuenta",
+    alreadyHaveAccount: "¿Ya tienes una cuenta?",
+    noAccount: "¿No tienes una cuenta?",
+    signInHere: "Iniciar sesión",
+    signUpHere: "Crear una",
+    passwordMismatch: "Las contraseñas no coinciden.",
+    passwordTooShort: "La contraseña debe tener al menos 6 caracteres.",
+    invalidEmail: "Introduce una dirección de correo válida.",
+    signupError: "No hemos podido crear tu cuenta. Inténtalo de nuevo.",
+    loginError: "No hemos podido iniciar sesión. Comprueba tus datos.",
+    checkEmail: "Comprueba tu correo",
+    checkEmailDescription: "Te hemos enviado un enlace de confirmación. Revisa tu bandeja de entrada para activar tu cuenta de FindMovie.",
+    backHome: "Volver a FindMovie",
+    logout: "Cerrar sesión",
+    loading: "Creando cuenta…",
   },
   footer: {
     tagline:
