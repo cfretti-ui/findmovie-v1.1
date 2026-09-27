@@ -65,10 +65,19 @@ type Dictionary = {
   about: {
     eyebrow: string;
     intro: string;
-    card1Title: string;
-    card1Body: string;
-    card2Title: string;
-    card2Body: string;
+    howEyebrow: string;
+    howTitle: string;
+    howIntro: string;
+    step1Title: string;
+    step1Body: string;
+    step2Title: string;
+    step2Body: string;
+    step3Title: string;
+    step3Body: string;
+    intelligenceTitle: string;
+    intelligenceBody: string;
+    finalTitle: string;
+    finalBody: string;
     findMovie: string;
   };
   questionnaire: {
@@ -236,14 +245,20 @@ const en: Dictionary = {
   },
   about: {
     eyebrow: "About",
-    intro:
-      "FindMovie helps you stop browsing and start watching. A short, thoughtful questionnaire turns mood, company, and streaming services into one clear recommendation.",
-    card1Title: "Built for real evenings",
-    card1Body:
-      "No endless lists. No noisy marketing. Just a calm path from “what should we watch?” to a film worth your time.",
-    card2Title: "Ready for what comes next",
-    card2Body:
-      "The product is structured for TMDb data, smarter recommendation logic, accounts, and Premium — without rewriting the experience.",
+    intro: "FindMovie helps you stop browsing and start watching. A short, thoughtful questionnaire turns your mood, preferences, and streaming services into one clear recommendation.",
+    howEyebrow: "How it works",
+    howTitle: "From feeling to film.",
+    howIntro: "FindMovie is designed to make the decision simple. Tell us what you want, and let the experience narrow everything down to one movie worth watching.",
+    step1Title: "Tell us what you want",
+    step1Body: "Choose your mood, genres, energy, viewing time, streaming services, and the kind of discovery you are looking for.",
+    step2Title: "FindMovie connects the dots",
+    step2Body: "Your answers are combined with movie data and recommendation logic to understand what could actually fit your evening.",
+    step3Title: "Get one recommendation",
+    step3Body: "Instead of another endless list, FindMovie gives you a focused movie recommendation you can immediately explore.",
+    intelligenceTitle: "A recommendation engine that learns.",
+    intelligenceBody: "FindMovie is built to become more personal over time. Your preferences, watched movies, favorites, and ratings can progressively shape recommendations that feel increasingly relevant to you.",
+    finalTitle: "Stop searching. Start watching.",
+    finalBody: "The next movie is already waiting. Tell FindMovie what you are in the mood for.",
     findMovie: "Find a movie",
   },
   questionnaire: {
@@ -481,14 +496,20 @@ const fr: Dictionary = {
   },
   about: {
     eyebrow: "À propos",
-    intro:
-      "FindMovie vous aide à arrêter de chercher et à commencer à regarder. Un court questionnaire transforme humeur, compagnie et plateformes en une recommandation claire.",
-    card1Title: "Conçu pour les vraies soirées",
-    card1Body:
-      "Pas de listes infinies. Pas de marketing bruyant. Juste un chemin calme de « on regarde quoi ? » à un film qui vaut le coup.",
-    card2Title: "Prêt pour la suite",
-    card2Body:
-      "Le produit est prêt pour TMDb, une logique de recommandation plus intelligente, les comptes et Premium — sans tout réécrire.",
+    intro: "FindMovie vous aide à arrêter de chercher et à commencer à regarder. Un court questionnaire transforme votre humeur, vos préférences et vos plateformes en une recommandation claire.",
+    howEyebrow: "Comment ça marche",
+    howTitle: "De l’envie au film.",
+    howIntro: "FindMovie est conçu pour simplifier le choix. Dites-nous ce que vous recherchez et laissez l’expérience réduire les possibilités jusqu’à trouver un film qui correspond vraiment à votre soirée.",
+    step1Title: "Dites-nous ce que vous voulez",
+    step1Body: "Choisissez votre humeur, vos genres, le rythme souhaité, le temps dont vous disposez, vos plateformes et le type de découverte que vous recherchez.",
+    step2Title: "FindMovie fait le lien",
+    step2Body: "Vos réponses sont croisées avec les données des films et la logique de recommandation afin de comprendre ce qui pourrait réellement correspondre à votre soirée.",
+    step3Title: "Obtenez une recommandation",
+    step3Body: "Plutôt qu’une nouvelle liste interminable, FindMovie vous propose une recommandation ciblée que vous pouvez immédiatement découvrir.",
+    intelligenceTitle: "Un moteur de recommandation qui apprend.",
+    intelligenceBody: "FindMovie est conçu pour devenir de plus en plus personnel. Vos préférences, vos films vus, vos favoris et vos évaluations pourront progressivement façonner des recommandations toujours plus pertinentes.",
+    finalTitle: "Arrêtez de chercher. Commencez à regarder.",
+    finalBody: "Le prochain film vous attend. Dites simplement à FindMovie ce dont vous avez envie.",
     findMovie: "Trouver un film",
   },
   questionnaire: {
@@ -726,14 +747,20 @@ const es: Dictionary = {
   },
   about: {
     eyebrow: "Acerca de",
-    intro:
-      "FindMovie te ayuda a dejar de buscar y empezar a ver. Un cuestionario breve convierte humor, compañía y plataformas en una recomendación clara.",
-    card1Title: "Hecho para noches reales",
-    card1Body:
-      "Sin listas interminables. Sin marketing ruidoso. Solo un camino calmado de «¿qué vemos?» a una película que merezca la pena.",
-    card2Title: "Listo para lo que viene",
-    card2Body:
-      "El producto está preparado para TMDb, una lógica de recomendación más inteligente, cuentas y Premium — sin reescribirlo todo.",
+    intro: "FindMovie te ayuda a dejar de buscar y empezar a ver. Un breve cuestionario convierte tu estado de ánimo, tus preferencias y tus plataformas en una recomendación clara.",
+    howEyebrow: "Cómo funciona",
+    howTitle: "De las ganas a la película.",
+    howIntro: "FindMovie está diseñado para simplificar la elección. Cuéntanos qué buscas y deja que la experiencia reduzca las opciones hasta encontrar una película que encaje de verdad con tu noche.",
+    step1Title: "Dinos qué quieres",
+    step1Body: "Elige tu estado de ánimo, géneros, ritmo, tiempo disponible, plataformas y el tipo de descubrimiento que buscas.",
+    step2Title: "FindMovie conecta las piezas",
+    step2Body: "Tus respuestas se combinan con los datos de las películas y la lógica de recomendación para entender qué podría encajar realmente contigo.",
+    step3Title: "Obtén una recomendación",
+    step3Body: "En lugar de otra lista interminable, FindMovie te ofrece una recomendación concreta que puedes descubrir inmediatamente.",
+    intelligenceTitle: "Un motor de recomendación que aprende.",
+    intelligenceBody: "FindMovie está diseñado para volverse más personal con el tiempo. Tus preferencias, películas vistas, favoritos y valoraciones podrán hacer que las recomendaciones sean cada vez más relevantes para ti.",
+    finalTitle: "Deja de buscar. Empieza a ver.",
+    finalBody: "Tu próxima película ya te está esperando. Dile a FindMovie qué te apetece ver.",
     findMovie: "Buscar una película",
   },
   questionnaire: {
