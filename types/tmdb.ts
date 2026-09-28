@@ -17,6 +17,16 @@ export interface TmdbGenre {
   name: string;
 }
 
+export interface TmdbKeyword {
+  id: number;
+  name: string;
+}
+
+export interface TmdbKeywordsResponse {
+  id: number;
+  keywords: TmdbKeyword[];
+}
+
 export interface TmdbGenresResponse {
   genres: TmdbGenre[];
 }
@@ -55,6 +65,7 @@ export interface TmdbMovieDetails extends Omit<TmdbMovie, "genre_ids"> {
   production_companies: TmdbProductionCompany[];
   production_countries: TmdbProductionCountry[];
   spoken_languages: TmdbSpokenLanguage[];
+  keywords?: TmdbKeywordsResponse;
   credits?: TmdbCredits;
   release_dates?: TmdbReleaseDatesResponse;
   "watch/providers"?: TmdbWatchProvidersResponse;

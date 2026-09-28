@@ -11,6 +11,7 @@ import { fadeUp, motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { MovieRating } from "./MovieRating";
 import { FavoriteButton } from "@/components/movie/FavoriteButton";
+import { SimilarMovies } from "./SimilarMovies";
 
 export function MovieDetailView({ movie }: { movie: Movie }) {
   useEffect(() => {
@@ -215,6 +216,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
             </div>
           </section>
         )}
+          <SimilarMovies movieId={movie.id} />
       </div>
     </div>
   );

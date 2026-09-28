@@ -1,33 +1,98 @@
 import type { QuestionDefinition } from "@/types/questionnaire";
-
-/**
- * V1.3 is intentionally shorter. Questions are ordered by information value:
- * mood/genres first, then practical constraints. Lower-value preferences are optional.
- */
 export const QUESTIONS: QuestionDefinition[] = [
-  { id: "mood", title: "What are you in the mood for?", required: true, skippable: false, multiple: false, options: [
-    { value: "Laugh", label: "Laugh" }, { value: "Think", label: "Think" }, { value: "Cry", label: "Cry" },
-    { value: "Feel inspired", label: "Feel inspired" }, { value: "Adventure", label: "Adventure" }, { value: "Be scared", label: "Be scared" },
-  ] },
-  { id: "genres", title: "Any genres calling you?", description: "Optional — pick one or more.", required: false, skippable: true, multiple: true, options: [
-    { value: "Action", label: "Action" }, { value: "Adventure", label: "Adventure" }, { value: "Comedy", label: "Comedy" },
-    { value: "Drama", label: "Drama" }, { value: "Sci-Fi", label: "Sci-Fi" }, { value: "Thriller", label: "Thriller" },
-    { value: "Romance", label: "Romance" }, { value: "Horror", label: "Horror" }, { value: "Animation", label: "Animation" },
-  ] },
-  { id: "energy", title: "How should it feel?", required: false, skippable: true, multiple: false, options: [
-    { value: "Slow & atmospheric", label: "Slow & atmospheric" }, { value: "Balanced", label: "Balanced" }, { value: "Fast & intense", label: "Fast & intense" },
-  ] },
-  { id: "duration", title: "How much time do you have?", required: false, skippable: true, multiple: false, options: [
-    { value: "Under 90 minutes", label: "Under 90 minutes" }, { value: "Under 2 hours", label: "Under 2 hours" }, { value: "No preference", label: "No preference" },
-  ] },
-  { id: "streamingServices", title: "Where can you watch?", description: "Optional — select every service you use.", required: false, skippable: true, multiple: true, options: [
-    { value: "Netflix", label: "Netflix" }, { value: "Prime Video", label: "Prime Video" }, { value: "Disney+", label: "Disney+" },
-    { value: "Apple TV+", label: "Apple TV+" }, { value: "Max", label: "Max" }, { value: "Canal+", label: "Canal+" },
-  ] },
-  { id: "discovery", title: "What kind of discovery?", required: false, skippable: true, multiple: false, options: [
-    { value: "Something iconic", label: "Something iconic" }, { value: "A hidden gem", label: "A hidden gem" }, { value: "Surprise me", label: "Surprise me" },
-  ] },
-  { id: "maxAge", title: "Any age limit?", required: false, skippable: true, multiple: false, options: [
-    { value: "all", label: "All audiences" }, { value: "10", label: "10+" }, { value: "12", label: "12+" }, { value: "16", label: "16+" }, { value: "18", label: "18+" },
-  ] },
+  {
+    id: "mood",
+    title: "Ce soir, on part sur quoi ?",
+    required: true,
+    skippable: false,
+    multiple: false,
+    options: [
+      { value: "Laugh", label: "Me faire rire" },
+      { value: "Think", label: "Me faire réfléchir" },
+      { value: "Cry", label: "Me toucher" },
+      { value: "Be scared", label: "Me faire frissonner" },
+      { value: "Adventure", label: "M’embarquer" },
+      { value: "Feel inspired", label: "M’inspirer" },
+    ],
+  },
+  {
+    id: "genres",
+    title: "Tu veux quel genre d’histoire ?",
+    description: "Choisis ce qui te tente.",
+    required: false,
+    skippable: true,
+    multiple: true,
+    options: [
+      { value: "Action", label: "Action" },
+      { value: "Adventure", label: "Aventure" },
+      { value: "Comedy", label: "Comédie" },
+      { value: "Drama", label: "Drame" },
+      { value: "Sci-Fi", label: "Science-fiction" },
+      { value: "Thriller", label: "Thriller" },
+      { value: "Romance", label: "Romance" },
+      { value: "Horror", label: "Horreur" },
+      { value: "Animation", label: "Animation" },
+    ],
+  },
+  {
+    id: "energy",
+    title: "Plutôt…",
+    required: false,
+    skippable: true,
+    multiple: false,
+    options: [
+      {
+        value: "Slow & atmospheric",
+        label: "Tranquille",
+        description: "Une ambiance qui prend son temps",
+      },
+      {
+        value: "Balanced",
+        label: "Équilibré",
+        description: "Un peu de tout",
+      },
+      {
+        value: "Fast & intense",
+        label: "Ça bouge",
+        description: "Du rythme, de l’intensité",
+      },
+    ],
+  },
+  {
+    id: "duration",
+    title: "Combien de temps on a ?",
+    required: false,
+    skippable: true,
+    multiple: false,
+    options: [
+      { value: "Under 90 minutes", label: "90 min max" },
+      { value: "Under 2 hours", label: "Environ 2 h" },
+      { value: "Under 2 hours 30", label: "Jusqu’à 2 h 30" },
+      { value: "No preference", label: "Peu importe" },
+    ],
+  },
+  {
+    id: "discovery",
+    title: "On tente quoi ?",
+    required: false,
+    skippable: true,
+    multiple: false,
+    options: [
+      {
+        value: "Something iconic",
+        label: "Un incontournable",
+        description: "Un film que tout le monde connaît",
+      },
+      {
+        value: "A hidden gem",
+        label: "Une pépite",
+        description: "Un film moins connu qui mérite d’être découvert",
+      },
+      {
+        value: "Surprise me",
+        label: "Surprends-moi",
+        description: "Trouve quelque chose auquel je n’aurais pas pensé",
+      },
+    ],
+  },
 ];

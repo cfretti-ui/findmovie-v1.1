@@ -34,7 +34,7 @@ function genreHits(movie: Movie, answers: QuestionnaireAnswers) {
 
 function durationFit(movie: Movie, value: QuestionnaireAnswers["duration"]) {
   if (!value || value === "No preference" || !movie.runtime) return 0;
-  const limit = value === "Under 90 minutes" ? 90 : 120;
+  const limit = value === "Under 90 minutes" ? 90 : value === "Under 2 hours" ? 120 : 150;
   if (movie.runtime <= limit) return 1;
   return Math.max(-1, 1 - (movie.runtime - limit) / 45);
 }

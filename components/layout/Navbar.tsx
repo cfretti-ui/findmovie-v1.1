@@ -20,6 +20,7 @@ export function Navbar() {
   const [results, setResults] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -42,6 +43,21 @@ export function Navbar() {
     return () => {
       subscription.unsubscribe();
     };
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("findmovie.recent-searches");
+      if (!stored) return;
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        setRecentSearches(
+          parsed.filter((item): item is string => typeof item === "string").slice(0, 5),
+        );
+      }
+    } catch {
+      setRecentSearches([]);
+    }
   }, []);
 
   useEffect(() => {
@@ -91,7 +107,7 @@ export function Navbar() {
     function handleKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        inputRef.current?.focus();
+        router.push("/search");
       }
 
       if (event.key === "Escape") {
@@ -132,7 +148,31 @@ export function Navbar() {
     };
   }, []);
 
-  const showResults = focused && query.trim().length > 0;
+  function saveRecentSearch(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const updated = [
+      trimmed,
+      ...recentSearches.filter(
+        (search) => search.toLowerCase() !== trimmed.toLowerCase(),
+      ),
+    ].slice(0, 5);
+    setRecentSearches(updated);
+    window.localStorage.setItem(
+      "findmovie.recent-searches",
+      JSON.stringify(updated),
+    );
+  }
+  function removeRecentSearch(value: string) {
+    const updated = recentSearches.filter((search) => search !== value);
+    setRecentSearches(updated);
+    window.localStorage.setItem(
+      "findmovie.recent-searches",
+      JSON.stringify(updated),
+    );
+  }
+
+  const showResults = focused && (query.trim().length > 0 || recentSearches.length > 0);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -241,9 +281,8 @@ export function Navbar() {
                   }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && query.trim()) {
-                      window.location.href = `/search?q=${encodeURIComponent(
-                        query.trim(),
-                      )}`;
+                      saveRecentSearch(query);
+                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
                     }
                   }}
                   placeholder={t("search.placeholder")}
@@ -290,6 +329,7 @@ export function Navbar() {
                             key={movie.id}
                             href={`/movie/${movie.id}`}
                             onClick={() => {
+                              saveRecentSearch(query);
                               setQuery("");
                               setFocused(false);
                             }}

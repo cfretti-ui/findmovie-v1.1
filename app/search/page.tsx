@@ -19,6 +19,7 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -26,6 +27,21 @@ export default function SearchPage() {
 
     if (initialQuery) {
       setQuery(initialQuery);
+    }
+  }, []);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("findmovie.recent-searches");
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        setRecentSearches(
+          parsed.filter((value): value is string => typeof value === "string").slice(0, 5),
+        );
+      }
+    } catch {
+      setRecentSearches([]);
     }
   }, []);
 
@@ -72,6 +88,30 @@ export default function SearchPage() {
       controller.abort();
     };
   }, [query, locale]);
+
+  function saveRecentSearch(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const updated = [
+      trimmed,
+      ...recentSearches.filter(
+        (search) => search.toLowerCase() !== trimmed.toLowerCase(),
+      ),
+    ].slice(0, 5);
+    setRecentSearches(updated);
+    window.localStorage.setItem(
+      "findmovie.recent-searches",
+      JSON.stringify(updated),
+    );
+  }
+  function removeRecentSearch(value: string) {
+    const updated = recentSearches.filter((search) => search !== value);
+    setRecentSearches(updated);
+    window.localStorage.setItem(
+      "findmovie.recent-searches",
+      JSON.stringify(updated),
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -166,26 +206,89 @@ export default function SearchPage() {
 
           {/* RESULTS */}
           <section className="mt-20">
-            {!query.trim() ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mx-auto max-w-2xl py-20 text-center"
-              >
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[20px] border border-black/[0.07] bg-white/60 text-2xl shadow-lg backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06]">
-                  ⌕
+          {!query.trim() ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mx-auto max-w-4xl py-12"
+            >
+              {recentSearches.length > 0 ? (
+                <>
+                  <div className="mb-6 flex items-end justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/40 dark:text-white/40">
+                        Recherche
+                      </p>
+                      <h2 className="mt-1 text-2xl font-semibold tracking-[-0.035em]">
+                        Recherches récentes
+                      </h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRecentSearches([]);
+                        window.localStorage.removeItem("findmovie.recent-searches");
+                      }}
+                      className="text-xs font-medium text-muted transition-colors hover:text-foreground"
+                    >
+                      Effacer
+                    </button>
+                  </div>
+                  <div className="overflow-hidden rounded-[24px] border border-black/[0.07] bg-white/60 shadow-[0_20px_60px_rgba(0,0,0,0.06)] backdrop-blur-2xl dark:border-white/[0.08] dark:bg-white/[0.05] dark:shadow-[0_20px_60px_rgba(0,0,0,0.2)]">
+                    {recentSearches.map((search, index) => (
+                      <div
+                        key={search}
+                        className={`group flex items-center ${
+                          index !== recentSearches.length - 1
+                            ? "border-b border-black/[0.06] dark:border-white/[0.07]"
+                            : ""
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            saveRecentSearch(search);
+                            setQuery(search);
+                          }}
+                          className="flex min-w-0 flex-1 items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-black/[0.035] dark:hover:bg-white/[0.05]"
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black/[0.05] text-base text-muted dark:bg-white/[0.08]">
+                            ↻
+                          </span>
+                          <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-foreground">
+                            {search}
+                          </span>
+                          <span className="text-muted opacity-0 transition-opacity group-hover:opacity-100">
+                            →
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Supprimer ${search}`}
+                          onClick={() => removeRecentSearch(search)}
+                          className="mr-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm text-muted transition-colors hover:bg-black/[0.06] hover:text-foreground dark:hover:bg-white/[0.08]"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="mx-auto max-w-2xl py-8 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[20px] border border-black/[0.07] bg-white/60 text-2xl shadow-lg backdrop-blur-xl dark:border-white/[0.08] dark:bg-white/[0.06]">
+                    ⌕
+                  </div>
+                  <h2 className="mt-6 text-lg font-semibold tracking-[-0.02em]">
+                    Que veux-tu regarder ?
+                  </h2>
+                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
+                    Recherche un titre, un film culte ou simplement quelque chose qui te donne envie.
+                  </p>
                 </div>
-
-                <h2 className="mt-6 text-lg font-semibold tracking-[-0.02em]">
-                  Que veux-tu regarder ?
-                </h2>
-
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-                  Recherche un titre, un film culte ou simplement quelque
-                  chose qui te donne envie.
-                </p>
-              </motion.div>
-            ) : null}
+              )}
+            </motion.div>
+          ) : null}
 
             {query.trim() && !loading && results.length === 0 ? (
               <motion.div
@@ -247,6 +350,7 @@ export default function SearchPage() {
                       >
                         <Link
                           href={`/movie/${movie.id}`}
+                          onClick={() => saveRecentSearch(query)}
                           className="group block"
                         >
                           <div className="relative aspect-[2/3] overflow-hidden rounded-[20px] bg-black/[0.04] shadow-md ring-1 ring-black/[0.07] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl dark:bg-white/[0.05] dark:ring-white/[0.08]">

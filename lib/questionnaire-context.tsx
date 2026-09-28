@@ -1,5 +1,4 @@
 "use client";
-
 import { usePathname } from "next/navigation";
 import {
   createContext,
@@ -16,10 +15,8 @@ import {
   type QuestionnaireAnswers,
   type QuestionId,
 } from "@/types/questionnaire";
-
-const STORAGE_KEY = "findmovie.questionnaire.v3";
+const STORAGE_KEY = "findmovie.questionnaire.v4";
 const EXCLUDED_KEY = "findmovie.excludedMovies";
-
 interface QuestionnaireContextValue {
   answers: QuestionnaireAnswers;
   excludedMovieIds: number[];
@@ -30,18 +27,10 @@ interface QuestionnaireContextValue {
   excludeMovie: (id: number) => void;
   clearExcluded: () => void;
 }
-
-const QuestionnaireContext = createContext<QuestionnaireContextValue | null>(
-  null,
-);
-
+const QuestionnaireContext = createContext<QuestionnaireContextValue | null>(null);
 const MULTI_IDS: MultiQuestionId[] = ["streamingServices", "genres"];
-
 function readStoredAnswers(): QuestionnaireAnswers {
-  if (typeof window === "undefined") {
-    return initialQuestionnaireAnswers;
-  }
-
+  if (typeof window === "undefined") return initialQuestionnaireAnswers;
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return initialQuestionnaireAnswers;
@@ -50,10 +39,8 @@ function readStoredAnswers(): QuestionnaireAnswers {
     return initialQuestionnaireAnswers;
   }
 }
-
 function readExcluded(): number[] {
   if (typeof window === "undefined") return [];
-
   try {
     const raw = sessionStorage.getItem(EXCLUDED_KEY);
     return raw ? (JSON.parse(raw) as number[]) : [];
@@ -61,15 +48,11 @@ function readExcluded(): number[] {
     return [];
   }
 }
-
 export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [answers, setAnswers] = useState<QuestionnaireAnswers>(
-    initialQuestionnaireAnswers,
-  );
+  const [answers, setAnswers] = useState<QuestionnaireAnswers>(initialQuestionnaireAnswers);
   const [excludedMovieIds, setExcludedMovieIds] = useState<number[]>([]);
   const [hydrated, setHydrated] = useState(false);
-
   useEffect(() => {
     if (pathname === "/questionnaire") {
       setAnswers(initialQuestionnaireAnswers);
@@ -80,80 +63,50 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     setExcludedMovieIds(readExcluded());
     setHydrated(true);
   }, [pathname]);
-
   useEffect(() => {
     if (!hydrated) return;
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
   }, [answers, hydrated]);
-
   useEffect(() => {
     if (!hydrated) return;
     sessionStorage.setItem(EXCLUDED_KEY, JSON.stringify(excludedMovieIds));
   }, [excludedMovieIds, hydrated]);
-
   const setAnswer = useCallback((id: QuestionId, value: string) => {
     if (MULTI_IDS.includes(id as MultiQuestionId)) return;
-
+    setAnswers((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  }, []);
+  const toggleMultiAnswer = useCallback((id: MultiQuestionId, value: string) => {
     setAnswers((prev) => {
-      if (id === "allowAdult") {
-        if (prev.watchingWith === "Family") {
-          return { ...prev, allowAdult: false };
-        }
-        return { ...prev, allowAdult: value === "true" };
-      }
-
-      const next = {
+      const current = prev[id] as string[];
+      const exists = current.includes(value);
+      return {
         ...prev,
-        [id]: value,
+        [id]: exists
+          ? current.filter((item) => item !== value)
+          : [...current, value],
       };
-
-      if (id === "watchingWith" && value === "Family") {
-        next.allowAdult = false;
-      }
-
-      return next;
     });
   }, []);
-
-  const toggleMultiAnswer = useCallback(
-    (id: MultiQuestionId, value: string) => {
-      setAnswers((prev) => {
-        const current = prev[id] as string[];
-        const exists = current.includes(value);
-        return {
-          ...prev,
-          [id]: exists
-            ? current.filter((item) => item !== value)
-            : [...current, value],
-        };
-      });
-    },
-    [],
-  );
-
   const reset = useCallback(() => {
     setAnswers(initialQuestionnaireAnswers);
     setExcludedMovieIds([]);
     sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(EXCLUDED_KEY);
   }, []);
-
   const excludeMovie = useCallback((id: number) => {
     setExcludedMovieIds((prev) =>
       prev.includes(id) ? prev : [...prev, id],
     );
   }, []);
-
   const clearExcluded = useCallback(() => {
     setExcludedMovieIds([]);
   }, []);
-
   const isComplete = useMemo(() => {
-    // V1.3 only requires a meaningful intent signal. Everything else is optional.
-    // This lets users skip low-value questions without weakening the matcher.
-    return answers.mood !== null || answers.genres.length > 0;
-  }, [answers.mood, answers.genres]);
-
+    return answers.mood !== null;
+  }, [answers.mood]);
   const value = useMemo(
     () => ({
       answers,
@@ -176,14 +129,12 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       clearExcluded,
     ],
   );
-
   return (
     <QuestionnaireContext.Provider value={value}>
       {children}
     </QuestionnaireContext.Provider>
   );
 }
-
 export function useQuestionnaire() {
   const context = useContext(QuestionnaireContext);
   if (!context) {
