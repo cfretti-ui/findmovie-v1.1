@@ -37,7 +37,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
 
     return (
 
-      <div>
+      <div className="relative isolate min-h-screen overflow-hidden bg-background">        
       {/* HERO BACKDROP */}
       <div className="relative h-[320px] w-full overflow-hidden sm:h-[440px]">
         {backdropUrl ? (
@@ -53,8 +53,7 @@ export function MovieDetailView({ movie }: { movie: Movie }) {
           <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800" />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/75 to-background/10" />
-      </div>
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/20 via-[45%] via-background/70 via-[75%] to-background to-[100%]" />     </div>
 
       <div className="relative z-10 mx-auto -mt-28 w-full max-w-6xl px-5 pb-20 sm:px-8">
         <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
