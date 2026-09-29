@@ -6,17 +6,50 @@ import {
   getHeroCollageMovies,
   getHomeTrendingMovies,
 } from "@/lib/catalog";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
-  const [collageMovies, trending] = await Promise.all([
+  const supabase = await createClient();
+
+  const [
+    { data: { user } },
+    collageMovies,
+    trending,
+  ] = await Promise.all([
+    supabase.auth.getUser(),
     getHeroCollageMovies(),
     getHomeTrendingMovies(),
   ]);
+
+  let displayName: string | null = null;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    displayName =
+      profile?.username ||
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      "Utilisateur";
+  }
 
   return (
     <>
       <Navbar />
       <main className="flex-1">
+        {displayName && (
+          <div className="mx-auto w-full max-w-7xl px-5 pt-8 sm:px-8">
+            <h1 className="text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-3xl">
+              Bonjour, {displayName}
+            </h1>
+          </div>
+        )}
+
         <Hero collageMovies={collageMovies} />
         <HomeContent trending={trending} />
       </main>
