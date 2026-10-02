@@ -50,7 +50,7 @@ export default async function HomePage() {
           </div>
         )}
 
-        <Hero collageMovies={collageMovies} />
+        <Hero collageMovies={collageMovies} displayName={displayName} />
         <HomeContent trending={trending} />
       </main>
       <Footer />
