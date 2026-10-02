@@ -42,14 +42,6 @@ export default async function HomePage() {
     <>
       <Navbar />
       <main className="flex-1">
-        {displayName && (
-          <div className="mx-auto w-full max-w-7xl px-5 pt-8 sm:px-8">
-            <h1 className="text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-3xl">
-              Bonjour, {displayName}
-            </h1>
-          </div>
-        )}
-
         <Hero collageMovies={collageMovies} displayName={displayName} />
         <HomeContent trending={trending} />
       </main>
