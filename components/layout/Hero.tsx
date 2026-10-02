@@ -7,13 +7,24 @@ import { PosterCollage } from "@/components/movie/PosterCollage";
 import { motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
 
-export function Hero({ collageMovies }: { collageMovies: Movie[] }) {
+export function Hero({
+  collageMovies,
+  displayName,
+}: {
+  collageMovies: Movie[];
+  displayName: string | null;
+}) {
   const { t } = useLocale();
   return (
     <section className="relative isolate overflow-hidden">
       <PosterCollage movies={collageMovies} />
       <div className="relative z-10 mx-auto flex min-h-[78vh] w-full max-w-7xl flex-col items-center justify-center px-5 pb-20 pt-20 text-center sm:min-h-[84vh] sm:px-8">
         <motion.div initial={{ opacity: 0, y: 20, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: motionEase }} className="glass-surface max-w-4xl rounded-[36px] px-6 py-10 sm:px-12 sm:py-14">
+          {displayName && (
+            <p className="mb-6 text-sm font-medium tracking-[-0.01em] text-foreground/65 sm:text-base">
+              Ravi de vous retrouver, {displayName}
+            </p>
+          )}
           <p className="text-[11px] font-semibold uppercase tracking-[.2em] text-muted">A smarter way to choose</p>
           <h1 className="mt-5 text-6xl font-semibold tracking-[-.065em] sm:text-7xl lg:text-8xl">FindMovie</h1>
           <p className="mx-auto mt-5 max-w-2xl text-xl font-medium tracking-[-.035em] text-foreground/85 sm:text-2xl">{t("hero.subtitle")}</p>
