@@ -39,6 +39,7 @@ type Dictionary = {
     description: string;
     findMovie: string;
     howItWorks: string;
+    name: string;
   };
   home: {
     featuresTitle: string;
@@ -223,6 +224,7 @@ const en: Dictionary = {
       "Discover movies perfectly matched to your mood, your favorite genres and your streaming services in under one minute.",
     findMovie: "Find a movie",
     howItWorks: "Discover how it works",
+    name: "A smarter way to choose",
   },
   home: {
     featuresTitle: "Designed for the perfect night in",
@@ -480,6 +482,7 @@ const fr: Dictionary = {
       "Découvrez des films parfaitement adaptés à votre humeur, vos genres favoris et vos services de streaming en moins d’une minute.",
     findMovie: "Trouver un film",
     howItWorks: "Découvrir comment ça marche",
+    name: "Un moyen plus intelligent de choisir",
   },
   home: {
     featuresTitle: "Pensé pour une soirée parfaite",
@@ -737,6 +740,7 @@ const es: Dictionary = {
       "Descubre películas perfectamente adaptadas a tu humor, tus géneros favoritos y tus servicios de streaming en menos de un minuto.",
     findMovie: "Buscar una película",
     howItWorks: "Descubrir cómo funciona",
+    name: "Un modo más inteligente de elegir",
   },
   home: {
     featuresTitle: "Diseñado para una noche perfecta",

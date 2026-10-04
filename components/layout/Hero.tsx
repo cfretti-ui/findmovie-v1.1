@@ -25,7 +25,7 @@ export function Hero({
               Ravi de vous retrouver, {displayName}
             </p>
           )}
-          <p className="text-[11px] font-semibold uppercase tracking-[.2em] text-muted">A smarter way to choose</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[.2em] text-muted">{t("hero.name")}</p>
           <h1 className="mt-5 text-6xl font-semibold tracking-[-.065em] sm:text-7xl lg:text-8xl">FindMovie</h1>
           <p className="mx-auto mt-5 max-w-2xl text-xl font-medium tracking-[-.035em] text-foreground/85 sm:text-2xl">{t("hero.subtitle")}</p>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-7 text-muted sm:text-base">{t("hero.description")}</p>
