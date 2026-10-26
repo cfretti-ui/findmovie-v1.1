@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { QuestionnaireProvider } from "@/lib/questionnaire-context";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import "./globals.css";
@@ -27,6 +28,7 @@ export default function RootLayout({
         <LocaleProvider>
           <QuestionnaireProvider>{children}</QuestionnaireProvider>
         </LocaleProvider>
+        <Analytics />
       </body>
     </html>
   );
