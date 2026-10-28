@@ -8,6 +8,7 @@ import { MovieRating } from "@/components/movie/MovieRating";
 import { Button } from "@/components/ui/Button";
 import { fadeIn, motionEase } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { createClient } from "@/lib/supabase/client";
 import type { Movie } from "@/types/movie";
 import type { ReasonToken } from "@/lib/scoring";
 export function RecommendationView() {
@@ -56,7 +57,7 @@ export function RecommendationView() {
   }, [answers, excludedMovieIds, isComplete]);
   useEffect(() => {
     fetchRecommendation();
-  }, [fetchRecommendation, seed]);
+  }, [fetchRecommendation]);
   const handleAnother = () => {
     if (movie) {
       excludeMovie(movie.id);
@@ -68,10 +69,35 @@ export function RecommendationView() {
       router.push(`/movie/${movie.id}`);
     }
   };
-  const handleWatched = () => {
-    if (movie) {
-      excludeMovie(movie.id);
+  const handleWatched = async () => {
+    if (!movie) return;
+
+    // Guests keep the action local; signed-in users also get a persistent watched signal.
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { error } = await supabase.from("watched_movies").upsert(
+          {
+            user_id: user.id,
+            movie_id: movie.id,
+            watched_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,movie_id" },
+        );
+        if (error) {
+          console.error("[watched-movies] Failed to save watched movie:", error.message);
+        }
+      }
+    } catch (error) {
+      console.error("[watched-movies] Failed to save watched movie:", error);
     }
+
+    // Avoid an immediate repeat in this session; future sessions only down-rank it.
+    excludeMovie(movie.id);
     setSeed((value) => value + 1);
   };
   const handleRestart = () => {
