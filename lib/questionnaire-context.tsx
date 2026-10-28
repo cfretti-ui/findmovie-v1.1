@@ -17,6 +17,7 @@ import {
   type QuestionId,
 } from "@/types/questionnaire";
 
+const STORAGE_KEY = "findmovie.questionnaire.v4";
 const EXCLUDED_KEY = "findmovie.excludedMovies";
 
 interface QuestionnaireContextValue {
@@ -35,6 +36,17 @@ const QuestionnaireContext = createContext<QuestionnaireContextValue | null>(
   null,
 );
 const MULTI_IDS: MultiQuestionId[] = ["streamingServices", "genres"];
+
+function readStoredAnswers(): QuestionnaireAnswers {
+  if (typeof window === "undefined") return { ...initialQuestionnaireAnswers };
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return { ...initialQuestionnaireAnswers };
+    return { ...initialQuestionnaireAnswers, ...JSON.parse(raw) };
+  } catch {
+    return { ...initialQuestionnaireAnswers };
+  }
+}
 
 function readExcluded(): number[] {
   if (typeof window === "undefined") return [];
@@ -56,14 +68,22 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setExcludedMovieIds(readExcluded());
-    setAnswers({ ...initialQuestionnaireAnswers });
+    setAnswers(readStoredAnswers());
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated || pathname !== "/questionnaire") return;
     setAnswers({ ...initialQuestionnaireAnswers });
+    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(EXCLUDED_KEY);
+    setExcludedMovieIds([]);
   }, [hydrated, pathname]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+  }, [answers, hydrated]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -128,6 +148,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const reset = useCallback(() => {
     setAnswers({ ...initialQuestionnaireAnswers });
     setExcludedMovieIds([]);
+    sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(EXCLUDED_KEY);
   }, []);
 
