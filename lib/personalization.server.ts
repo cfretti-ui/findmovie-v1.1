@@ -24,20 +24,6 @@ export interface PersonalizationProfile {
   excludedIds: number[];
 }
 
-const EMPTY_PROFILE: PersonalizationProfile = {
-  settings: {
-    streamingServices: [],
-    genres: [],
-    maxAge: null,
-    allowAdult: false,
-  },
-  history: [],
-  ratings: {},
-  favoriteIds: [],
-  watchedIds: [],
-  excludedIds: [],
-};
-
 const AGE_MAX_VALUES: AgeMax[] = ["all", "10", "12", "16", "18"];
 
 function parseIds(rows: Array<{ movie_id: number }> | null | undefined) {
