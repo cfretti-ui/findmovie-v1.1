@@ -7,16 +7,33 @@ import { Button } from "@/components/ui/Button";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { motion } from "framer-motion";
 
-export function HomeContent({ trending }: { trending: Movie[] }) {
+export function HomeContent({
+  trending,
+  forYou,
+}: {
+  trending: Movie[];
+  forYou?: Movie[] | null;
+}) {
   const { t } = useLocale();
+  const personalized = Boolean(forYou?.length);
+  const movies = personalized ? forYou! : trending;
+
   return (
     <div className="relative z-10">
       <section className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 sm:py-20">
         <div className="flex items-end justify-between gap-5">
-          <div><p className="text-[11px] font-semibold uppercase tracking-[.18em] text-muted">Explore</p><h2 className="mt-2 text-3xl font-semibold tracking-[-.045em] sm:text-4xl">{t("home.trendingTitle")}</h2><p className="mt-2 text-sm text-muted sm:text-base">{t("home.trendingSubtitle")}</p></div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[.18em] text-muted">Explore</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-[-.045em] sm:text-4xl">
+              {personalized ? t("home.forYouTitle") : t("home.trendingTitle")}
+            </h2>
+            <p className="mt-2 text-sm text-muted sm:text-base">
+              {personalized ? t("home.forYouSubtitle") : t("home.trendingSubtitle")}
+            </p>
+          </div>
           <Button href="/questionnaire" variant="glass" className="hidden sm:inline-flex">{t("hero.findMovie")} →</Button>
         </div>
-        <div className="mt-7"><MovieCarousel movies={trending} /></div>
+        <div className="mt-7"><MovieCarousel movies={movies} /></div>
       </section>
 
       <section id="how-it-works" className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-10 sm:grid-cols-3 sm:px-8 sm:py-16">
