@@ -55,39 +55,9 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    let cancelled = false;
-
-    async function hydrate() {
-      setExcludedMovieIds(readExcluded());
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (cancelled) return;
-
-      // Questionnaire answers are temporary and are never loaded from Settings.
-      setAnswers({ ...initialQuestionnaireAnswers });
-      setHydrated(true);
-    }
-
-    void hydrate().catch(() => {
-      if (!cancelled) {
-        setAnswers({ ...initialQuestionnaireAnswers });
-        setHydrated(true);
-      }
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      // Authentication changes must not hydrate questionnaire answers from preferences.
-    });
-
-    return () => {
-      cancelled = true;
-      subscription.unsubscribe();
-    };
+    setExcludedMovieIds(readExcluded());
+    setAnswers({ ...initialQuestionnaireAnswers });
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
