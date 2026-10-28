@@ -153,10 +153,6 @@ export function mergeSettingsIntoAnswers(
       answers.streamingServices.length > 0
         ? answers.streamingServices
         : settings.streamingServices as QuestionnaireAnswers["streamingServices"],
-    genres:
-      answers.genres.length > 0
-        ? answers.genres
-        : settings.genres as QuestionnaireAnswers["genres"],
     maxAge: settings.maxAge ?? answers.maxAge,
     allowAdult: settings.allowAdult || answers.allowAdult,
   };
