@@ -9,6 +9,8 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { initialQuestionnaireAnswers } from "@/types/questionnaire";
 import { recommendMovie } from "@/lib/recommendation.server";
+import { getRequestLocale } from "@/lib/i18n/server-locale";
+import { parseLocale } from "@/lib/i18n/tmdb-locale";
 import {
   getHistoryGenreWeights,
   loadPersonalizationProfile,
@@ -17,6 +19,7 @@ import {
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const locale = parseLocale(await getRequestLocale());
 
   const [
     { data: { user } },
@@ -25,8 +28,8 @@ export default async function HomePage() {
     personalization,
   ] = await Promise.all([
     supabase.auth.getUser(),
-    getHeroCollageMovies(),
-    getHomeTrendingMovies(),
+    getHeroCollageMovies(locale),
+    getHomeTrendingMovies(locale),
     loadPersonalizationProfile(),
   ]);
 
@@ -63,7 +66,7 @@ export default async function HomePage() {
         { ...initialQuestionnaireAnswers, ...lastAnswers },
         personalization,
       );
-      const recommendation = await recommendMovie(answers, [], "en", {
+      const recommendation = await recommendMovie(answers, [], locale, {
         excludedIds: personalization.excludedIds,
         watchedIds: personalization.watchedIds,
         favoriteIds: personalization.favoriteIds,
