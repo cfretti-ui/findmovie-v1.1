@@ -53,6 +53,13 @@ function durationFit(movie: Movie, value: QuestionnaireAnswers["duration"]) {
   return Math.max(-1, 1 - (movie.runtime - limit) / 45);
 }
 
+function normalizeGenre(genre: string) {
+  const normalized = genre.trim().toLowerCase();
+  return normalized === "sci-fi" || normalized === "science fiction"
+    ? "science fiction"
+    : normalized;
+}
+
 function qualityScore(movie: Movie) {
   const rating = Math.max(0, Math.min(10, movie.imdbRating || 0));
   const votes = Math.max(0, movie.voteCount ?? 0);
@@ -116,14 +123,14 @@ export function scoreMovie(
   if (movie.imdbRating >= 7.5) reasons.push({ key: "reasons.quality" });
 
   // Account signals are secondary to the current questionnaire.
-  const movieGenres = new Set(movie.genres.map((genre) => genre.toLowerCase()));
+  const movieGenres = new Set(movie.genres.map(normalizeGenre));
   const preferredGenreHits = (signals?.preferredGenres ?? []).filter((genre) =>
-    movieGenres.has(genre.toLowerCase()),
+    movieGenres.has(normalizeGenre(genre)),
   ).length;
   score += Math.min(8, preferredGenreHits * 4);
 
   const historicalGenreHits = Object.entries(signals?.historyGenreWeights ?? {})
-    .filter(([genre, weight]) => weight > 0 && movieGenres.has(genre.toLowerCase()))
+    .filter(([genre, weight]) => weight > 0 && movieGenres.has(normalizeGenre(genre)))
     .reduce((sum, [, weight]) => sum + Math.min(weight, 2), 0);
   score += Math.min(6, historicalGenreHits * 2);
 
