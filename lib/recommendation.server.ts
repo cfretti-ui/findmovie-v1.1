@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { Movie } from "@/types/movie";
-import type { QuestionnaireAnswers } from "@/types/questionnaire";
+import type { MovieGenreOption, QuestionnaireAnswers } from "@/types/questionnaire";
 import { answersToDiscoverFilters } from "@/lib/discover-filters";
 import { getFallbackMovies } from "@/lib/fallback-movies.server";
 import { mapTmdbDetailsToMovie, mapTmdbSummaryToMovie } from "@/lib/movie-mapper";
@@ -77,9 +77,24 @@ async function recommendFromTmdb(
 ): Promise<RecommendationResult> {
   const language = localeToTmdbLanguage(locale);
   const region = localeToWatchRegion(locale);
+  // When this run has no explicit genres, recent quiz history can guide discovery.
+  const allowedGenres: MovieGenreOption[] = [
+    "Action", "Adventure", "Comedy", "Drama", "Sci-Fi",
+    "Thriller", "Romance", "Horror", "Animation",
+  ];
+  const historicalGenres = Object.entries(signals?.historyGenreWeights ?? {})
+    .filter(([genre]) => allowedGenres.includes(genre as MovieGenreOption))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([genre]) => genre as MovieGenreOption);
+  const discoveryAnswers =
+    answers.genres.length === 0 && historicalGenres.length > 0
+      ? { ...answers, genres: historicalGenres }
+      : answers;
+
   // Broad candidate discovery, then expensive details only for the strongest candidates.
   const pages = [1, 2, 3];
-  const responses = await Promise.all(pages.map((page) => discoverMovies(answersToDiscoverFilters(answers, page, locale))));
+  const responses = await Promise.all(pages.map((page) => discoverMovies(answersToDiscoverFilters(discoveryAnswers, page, locale))));
   const summaries = [...new Map(responses.flatMap((r) => r.results).filter((m) => m.poster_path && !excludeIds.includes(m.id)).map((m) => [m.id, mapTmdbSummaryToMovie(m)])).values()];
   if (!summaries.length) throw new TmdbApiError("No discover results for current filters.");
 
