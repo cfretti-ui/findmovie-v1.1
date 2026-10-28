@@ -6,17 +6,10 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
-import {
-  USER_PREFERENCES_COLUMNS,
-  answersToUserPreferences,
-  userPreferencesToAnswers,
-  type UserPreferencesRecord,
-} from "@/lib/user-preferences";
 import {
   initialQuestionnaireAnswers,
   type MultiQuestionId,
@@ -24,7 +17,6 @@ import {
   type QuestionId,
 } from "@/types/questionnaire";
 
-const STORAGE_KEY = "findmovie.questionnaire.v4";
 const EXCLUDED_KEY = "findmovie.excludedMovies";
 
 interface QuestionnaireContextValue {
@@ -36,24 +28,13 @@ interface QuestionnaireContextValue {
   reset: () => void;
   excludeMovie: (id: number) => void;
   clearExcluded: () => void;
-  persistPreferences: () => Promise<void>;
+  saveQuestionnaireHistory: (answers: QuestionnaireAnswers) => Promise<void>;
 }
 
 const QuestionnaireContext = createContext<QuestionnaireContextValue | null>(
   null,
 );
 const MULTI_IDS: MultiQuestionId[] = ["streamingServices", "genres"];
-
-function readStoredAnswers(): QuestionnaireAnswers {
-  if (typeof window === "undefined") return initialQuestionnaireAnswers;
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return initialQuestionnaireAnswers;
-    return { ...initialQuestionnaireAnswers, ...JSON.parse(raw) };
-  } catch {
-    return initialQuestionnaireAnswers;
-  }
-}
 
 function readExcluded(): number[] {
   if (typeof window === "undefined") return [];
@@ -72,27 +53,10 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   );
   const [excludedMovieIds, setExcludedMovieIds] = useState<number[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-  const answersRef = useRef(answers);
-  answersRef.current = answers;
 
   useEffect(() => {
     const supabase = createClient();
     let cancelled = false;
-
-    async function loadAccountPreferences(nextUserId: string) {
-      const { data } = await supabase
-        .from("user_preferences")
-        .select(USER_PREFERENCES_COLUMNS)
-        .eq("user_id", nextUserId)
-        .maybeSingle();
-      if (cancelled) return;
-      if (data) {
-        setAnswers(userPreferencesToAnswers(data as UserPreferencesRecord));
-      } else {
-        setAnswers(readStoredAnswers());
-      }
-    }
 
     async function hydrate() {
       setExcludedMovieIds(readExcluded());
@@ -102,35 +66,22 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       } = await supabase.auth.getUser();
       if (cancelled) return;
 
-      if (!user) {
-        setUserId(null);
-        setAnswers(readStoredAnswers());
-        setHydrated(true);
-        return;
-      }
-
-      setUserId(user.id);
-      try {
-        await loadAccountPreferences(user.id);
-      } catch {
-        if (!cancelled) setAnswers(readStoredAnswers());
-      }
-      if (!cancelled) setHydrated(true);
+      // Questionnaire answers are temporary and are never loaded from Settings.
+      setAnswers({ ...initialQuestionnaireAnswers });
+      setHydrated(true);
     }
 
-    void hydrate();
+    void hydrate().catch(() => {
+      if (!cancelled) {
+        setAnswers({ ...initialQuestionnaireAnswers });
+        setHydrated(true);
+      }
+    });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "INITIAL_SESSION") return;
-      const nextUser = session?.user ?? null;
-      setUserId(nextUser?.id ?? null);
-      if (nextUser) {
-        void loadAccountPreferences(nextUser.id).catch(() => {
-          /* keep in-memory answers */
-        });
-      }
+    } = supabase.auth.onAuthStateChange(() => {
+      // Authentication changes must not hydrate questionnaire answers from preferences.
     });
 
     return () => {
@@ -140,16 +91,9 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!hydrated || userId) return;
-    if (pathname !== "/questionnaire") return;
-    setAnswers(initialQuestionnaireAnswers);
-    sessionStorage.removeItem(STORAGE_KEY);
-  }, [hydrated, pathname, userId]);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
-  }, [answers, hydrated]);
+    if (!hydrated || pathname !== "/questionnaire") return;
+    setAnswers({ ...initialQuestionnaireAnswers });
+  }, [hydrated, pathname]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -180,41 +124,40 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const persistPreferences = useCallback(async () => {
-    const snapshot = answersRef.current;
-    if (!snapshot.mood) return;
+  const saveQuestionnaireHistory = useCallback(
+    async (snapshot: QuestionnaireAnswers) => {
+      if (!snapshot.mood) return;
 
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const { data: existing } = await supabase
-        .from("user_preferences")
-        .select(USER_PREFERENCES_COLUMNS)
-        .eq("user_id", user.id)
-        .maybeSingle();
+        const { error } = await supabase.from("questionnaire_history").insert({
+          user_id: user.id,
+          mood: snapshot.mood,
+          genres: snapshot.genres,
+          energy: snapshot.energy,
+          duration: snapshot.duration,
+          discovery: snapshot.discovery,
+          answers: snapshot,
+        });
 
-      const payload = answersToUserPreferences(
-        snapshot,
-        user.id,
-        (existing as UserPreferencesRecord | null) ?? null,
-      );
-
-      await supabase.from("user_preferences").upsert(payload, {
-        onConflict: "user_id",
-      });
-    } catch {
-      /* Persistence must never block recommendations. */
-    }
-  }, []);
+        if (error) {
+          console.error("[questionnaire-history] Failed to save history:", error.message);
+        }
+      } catch (error) {
+        console.error("[questionnaire-history] Failed to save history:", error);
+      }
+    },
+    [],
+  );
 
   const reset = useCallback(() => {
-    setAnswers(initialQuestionnaireAnswers);
+    setAnswers({ ...initialQuestionnaireAnswers });
     setExcludedMovieIds([]);
-    sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(EXCLUDED_KEY);
   }, []);
 
@@ -242,7 +185,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       reset,
       excludeMovie,
       clearExcluded,
-      persistPreferences,
+      saveQuestionnaireHistory,
     }),
     [
       answers,
@@ -253,7 +196,7 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
       reset,
       excludeMovie,
       clearExcluded,
-      persistPreferences,
+      saveQuestionnaireHistory,
     ],
   );
 
