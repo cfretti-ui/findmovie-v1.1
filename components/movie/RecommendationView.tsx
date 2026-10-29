@@ -168,7 +168,7 @@ export function RecommendationView() {
                 <RecommendationCard
                   movie={movie}
                   reasons={reasons}
-                  onWatched={handleAnother}
+                  onWatched={handleWatched}
                   onAnother={handleAnother}
                   onViewMovie={handleViewMovie}
                   onRestart={handleRestart}
