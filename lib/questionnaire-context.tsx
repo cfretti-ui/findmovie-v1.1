@@ -67,16 +67,23 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Restore session-only questionnaire state after the client has mounted.
+    // These state updates are intentional hydration from browser storage.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setExcludedMovieIds(readExcluded());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnswers(readStoredAnswers());
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated || pathname !== "/questionnaire") return;
+    // Starting a fresh questionnaire intentionally resets the in-memory answers.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnswers({ ...initialQuestionnaireAnswers });
     sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(EXCLUDED_KEY);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setExcludedMovieIds([]);
   }, [hydrated, pathname]);
 
