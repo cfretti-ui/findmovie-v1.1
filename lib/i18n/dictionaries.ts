@@ -52,6 +52,8 @@ type Dictionary = {
     feature3Description: string;
     trendingTitle: string;
     trendingSubtitle: string;
+    forYouTitle: string;
+    forYouSubtitle: string;
     howTitle: string;
     howSubtitle: string;
     stepLabel: string;
@@ -239,6 +241,8 @@ const en: Dictionary = {
       "Answer a few questions and instantly discover your next movie.",
     trendingTitle: "Trending Tonight",
     trendingSubtitle: "A curated set of films people are watching right now.",
+    forYouTitle: "Picked for you",
+    forYouSubtitle: "Recommendations shaped by your recent choices and ratings.",
     howTitle: "How it works",
     howSubtitle: "Three quiet steps between you and your next favorite film.",
     stepLabel: "Step",
@@ -497,6 +501,8 @@ const fr: Dictionary = {
       "Répondez à quelques questions et découvrez immédiatement votre prochain film.",
     trendingTitle: "Tendances ce soir",
     trendingSubtitle: "Une sélection de films que les gens regardent en ce moment.",
+    forYouTitle: "Pour vous",
+    forYouSubtitle: "Des recommandations adaptées à vos choix récents et à vos évaluations.",
     howTitle: "Comment ça marche",
     howSubtitle: "Trois étapes simples jusqu’à votre prochain film préféré.",
     stepLabel: "Étape",
@@ -755,6 +761,8 @@ const es: Dictionary = {
       "Responde unas preguntas y descubre al instante tu próxima película.",
     trendingTitle: "Tendencias esta noche",
     trendingSubtitle: "Una selección de películas que la gente está viendo ahora.",
+    forYouTitle: "Para ti",
+    forYouSubtitle: "Recomendaciones basadas en tus elecciones recientes y valoraciones.",
     howTitle: "Cómo funciona",
     howSubtitle: "Tres pasos sencillos hasta tu próxima película favorita.",
     stepLabel: "Paso",

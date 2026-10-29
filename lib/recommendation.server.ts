@@ -1,11 +1,11 @@
 import "server-only";
 
 import type { Movie } from "@/types/movie";
-import type { QuestionnaireAnswers } from "@/types/questionnaire";
+import type { MovieGenreOption, QuestionnaireAnswers } from "@/types/questionnaire";
 import { answersToDiscoverFilters } from "@/lib/discover-filters";
 import { getFallbackMovies } from "@/lib/fallback-movies.server";
 import { mapTmdbDetailsToMovie, mapTmdbSummaryToMovie } from "@/lib/movie-mapper";
-import { filterCandidates, rankMovies, type ReasonToken } from "@/lib/scoring";
+import { filterCandidates, rankMovies, type PersonalizationSignals, type ReasonToken } from "@/lib/scoring";
 import type { Locale } from "@/lib/i18n/locales";
 import { localeToTmdbLanguage, localeToWatchRegion } from "@/lib/i18n/tmdb-locale";
 import { discoverMovies, getMovieDetails, getMovieRecommendations, getSimilarMovies, isTmdbConfigured, TmdbApiError } from "@/services/tmdb";
@@ -56,30 +56,55 @@ function diversify(ranked: ReturnType<typeof rankMovies>, limit = 7) {
   return chosen;
 }
 
-export async function recommendMovie(answers: QuestionnaireAnswers, excludeIds: number[] = [], locale: Locale = "en"): Promise<RecommendationResult> {
+export async function recommendMovie(
+  answers: QuestionnaireAnswers,
+  excludeIds: number[] = [],
+  locale: Locale = "en",
+  signals?: PersonalizationSignals,
+): Promise<RecommendationResult> {
   if (isTmdbConfigured()) {
-    try { return await recommendFromTmdb(answers, excludeIds, locale); }
+    try { return await recommendFromTmdb(answers, excludeIds, locale, signals); }
     catch (error) { console.warn("[recommend] TMDb failed:", error instanceof TmdbApiError ? error.message : error); }
   }
-  return recommendFromFallback(answers, excludeIds);
+  return recommendFromFallback(answers, excludeIds, signals);
 }
 
-async function recommendFromTmdb(answers: QuestionnaireAnswers, excludeIds: number[], locale: Locale): Promise<RecommendationResult> {
+async function recommendFromTmdb(
+  answers: QuestionnaireAnswers,
+  excludeIds: number[],
+  locale: Locale,
+  signals?: PersonalizationSignals,
+): Promise<RecommendationResult> {
   const language = localeToTmdbLanguage(locale);
   const region = localeToWatchRegion(locale);
+  // When this run has no explicit genres, recent quiz history can guide discovery.
+  const allowedGenres: MovieGenreOption[] = [
+    "Action", "Adventure", "Comedy", "Drama", "Sci-Fi",
+    "Thriller", "Romance", "Horror", "Animation",
+  ];
+  const historicalGenres = Object.entries(signals?.historyGenreWeights ?? {})
+    .filter(([genre]) => allowedGenres.includes(genre as MovieGenreOption))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([genre]) => genre as MovieGenreOption);
+  const discoveryAnswers =
+    answers.genres.length === 0 && historicalGenres.length > 0
+      ? { ...answers, genres: historicalGenres }
+      : answers;
+
   // Broad candidate discovery, then expensive details only for the strongest candidates.
   const pages = [1, 2, 3];
-  const responses = await Promise.all(pages.map((page) => discoverMovies(answersToDiscoverFilters(answers, page, locale))));
+  const responses = await Promise.all(pages.map((page) => discoverMovies(answersToDiscoverFilters(discoveryAnswers, page, locale))));
   const summaries = [...new Map(responses.flatMap((r) => r.results).filter((m) => m.poster_path && !excludeIds.includes(m.id)).map((m) => [m.id, mapTmdbSummaryToMovie(m)])).values()];
   if (!summaries.length) throw new TmdbApiError("No discover results for current filters.");
 
   // Summary-stage ranking cheaply narrows a 60-result candidate pool before hydration.
-  const prefiltered = filterCandidates(summaries, answers, excludeIds);
-  const preRanked = rankMovies(prefiltered.length ? prefiltered : summaries, answers);
+  const prefiltered = filterCandidates(summaries, answers, excludeIds, signals);
+  const preRanked = rankMovies(prefiltered.length ? prefiltered : summaries, answers, signals);
   const shortlist = diversify(preRanked, 12).map((x) => x.movie);
   const hydrated = await hydrateCandidates(shortlist, language, region);
-  const filtered = filterCandidates(hydrated, answers, excludeIds);
-  const ranked = rankMovies(filtered, answers);
+  const filtered = filterCandidates(hydrated, answers, excludeIds, signals);
+  const ranked = rankMovies(filtered, answers, signals);
   const diversified = diversify(ranked, 7);
   const winner = diversified[0];
   if (!winner) throw new TmdbApiError("No candidates left after ranking.");
@@ -88,10 +113,14 @@ async function recommendFromTmdb(answers: QuestionnaireAnswers, excludeIds: numb
   return { movie: winner.movie, reasons: winner.reasons, similar };
 }
 
-function recommendFromFallback(answers: QuestionnaireAnswers, excludeIds: number[]): RecommendationResult {
+function recommendFromFallback(
+  answers: QuestionnaireAnswers,
+  excludeIds: number[],
+  signals?: PersonalizationSignals,
+): RecommendationResult {
   const catalog = getFallbackMovies();
-  const filtered = filterCandidates(catalog, answers, excludeIds);
-  const ranked = rankMovies(filtered, answers);
+  const filtered = filterCandidates(catalog, answers, excludeIds, signals);
+  const ranked = rankMovies(filtered, answers, signals);
   const diversified = diversify(ranked, 7);
   const winner = diversified[0];
   if (!winner) throw new Error("Fallback catalog is empty. Run npm run build:fallback.");

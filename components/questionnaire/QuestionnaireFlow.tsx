@@ -14,7 +14,7 @@ const MULTI_IDS: MultiQuestionId[] = ["streamingServices", "genres"];
 export function QuestionnaireFlow() {
   const router = useRouter();
   const { t, dictionary } = useLocale();
-  const { answers, setAnswer, toggleMultiAnswer, isComplete, persistPreferences } =
+  const { answers, setAnswer, toggleMultiAnswer, isComplete, saveQuestionnaireHistory } =
     useQuestionnaire();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -38,10 +38,11 @@ export function QuestionnaireFlow() {
     return value ? [String(value)] : [];
   }, [answers, question.id]);
   const canContinue = selectedValues.length > 0 || Boolean(question.skippable);
-  const finish = useCallback(() => {
-    void persistPreferences();
+  const finish = useCallback(async () => {
+    // Save a snapshot of this run for signed-in users; failures never block the recommendation.
+    await saveQuestionnaireHistory(answers);
     router.push("/recommendation");
-  }, [persistPreferences, router]);
+  }, [answers, saveQuestionnaireHistory, router]);
   const goNext = useCallback(() => {
     if (!canContinue) return;
     if (step === QUESTIONS.length - 1) return finish();

@@ -7,18 +7,30 @@ import {
   getHomeTrendingMovies,
 } from "@/lib/catalog";
 import { createClient } from "@/lib/supabase/server";
+import { initialQuestionnaireAnswers } from "@/types/questionnaire";
+import { recommendMovie } from "@/lib/recommendation.server";
+import { getRequestLocale } from "@/lib/i18n/server-locale";
+import { parseLocale } from "@/lib/i18n/tmdb-locale";
+import {
+  getHistoryGenreWeights,
+  loadPersonalizationProfile,
+  mergeSettingsIntoAnswers,
+} from "@/lib/personalization.server";
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const locale = parseLocale(await getRequestLocale());
 
   const [
     { data: { user } },
     collageMovies,
     trending,
+    personalization,
   ] = await Promise.all([
     supabase.auth.getUser(),
-    getHeroCollageMovies(),
-    getHomeTrendingMovies(),
+    getHeroCollageMovies(locale),
+    getHomeTrendingMovies(locale),
+    loadPersonalizationProfile(),
   ]);
 
   let displayName: string | null = null;
@@ -38,12 +50,45 @@ export default async function HomePage() {
       "Utilisateur";
   }
 
+  let forYou: typeof trending | null = null;
+  const hasPersonalizationSignal = Boolean(
+    personalization &&
+      (personalization.history.length > 0 ||
+        Object.keys(personalization.ratings).length > 0 ||
+        personalization.favoriteIds.length > 0),
+  );
+
+  if (user && personalization && hasPersonalizationSignal) {
+    try {
+      const lastAnswers =
+        personalization.history[0]?.answers ?? initialQuestionnaireAnswers;
+      const answers = mergeSettingsIntoAnswers(
+        { ...initialQuestionnaireAnswers, ...lastAnswers },
+        personalization,
+      );
+      const recommendation = await recommendMovie(answers, [], locale, {
+        excludedIds: personalization.excludedIds,
+        watchedIds: personalization.watchedIds,
+        favoriteIds: personalization.favoriteIds,
+        ratings: personalization.ratings,
+        preferredGenres: personalization.settings.genres,
+        historyGenreWeights: getHistoryGenreWeights(personalization),
+      });
+      forYou = [
+        recommendation.movie,
+        ...recommendation.similar,
+      ].slice(0, 12);
+    } catch (error) {
+      console.warn("[home] Personalized rail unavailable:", error);
+    }
+  }
+
   return (
     <>
       <Navbar />
       <main className="flex-1">
         <Hero collageMovies={collageMovies} displayName={displayName} />
-        <HomeContent trending={trending} />
+        <HomeContent trending={trending} forYou={forYou} />
       </main>
       <Footer />
     </>
