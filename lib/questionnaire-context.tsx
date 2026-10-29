@@ -70,7 +70,6 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     // Restore session-only questionnaire state after the client has mounted.
     // These state updates are intentional hydration from browser storage.
     setExcludedMovieIds(readExcluded());
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnswers(readStoredAnswers());
     setHydrated(true);
   }, []);
@@ -82,7 +81,6 @@ export function QuestionnaireProvider({ children }: { children: ReactNode }) {
     setAnswers({ ...initialQuestionnaireAnswers });
     sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(EXCLUDED_KEY);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setExcludedMovieIds([]);
   }, [hydrated, pathname]);
 
